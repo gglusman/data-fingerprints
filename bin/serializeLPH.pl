@@ -1,9 +1,9 @@
 #!/bin/env perl
 use strict;
-my $version = '170925';
+my $version = '180110';
 ####
 #
-# This software binarizes data fingerprints into a database for efficient searching.
+# This software serializes data fingerprints into a database for efficient searching.
 # 
 # Copyright 2017 by Gustavo Glusman, Institute for Systems Biology, Seattle, WA, USA.
 # It is provided by the Institute for Systems Biology as open source software,
@@ -24,8 +24,8 @@ my $version = '170925';
 ####
 #
 # Example of usage:
-#   binarizeLPH.pl lphDB 50 1 0 dataFingerprints.out.gz
-#   binarizeLPH.pl lphDB 50 3 1 @listOfFiles fingerprints/*.outn.gz
+#   serializeLPH.pl lphDB 50 1 0 dataFingerprints.out.gz
+#   serializeLPH.pl lphDB 50 3 1 @listOfFiles fingerprints/*.outn.gz
 #     --> lphDB.fp
 #     --> lphDB.id
 #
@@ -117,48 +117,6 @@ $done ||= "zero";
 print "Added $done fingerprints to $outbase.fp\n";
 
 ###
-sub readDMF {
-	my($file, $L) = @_;
-	my(%v, $binary, $pairs);
-	
-	if ($file =~ /\.gz$/) {
-		open F, "gunzip -c $file |";
-	} else {
-		open F, $file;
-	}
-	while (<F>) {
-		chomp;
-		my($vl, $key, @v) = split /\t/;
-		if ($vl =~ /^#/) {
-			if ($vl eq '#binary') {
-				$binary = $key;
-			} elsif ($vl eq '#SNVpairs') {
-				$pairs = $key;
-			}
-			next;
-		}
-		if ($vl =~ /^[ACGT]+$/) {
-			#old-style fingerprint
-			unshift @v, $key;
-			$key = $vl;
-			$vl = scalar @v;
-		}
-		$v{$vl}{$key} = \@v if $vl==$L;
-	}
-	close F;
-	return \%v, $binary, $pairs;
-}
-
-sub foldDMF {
-	my($v) = @_;
-	my %f;
-	
-	foreach my $vl (keys %$v) {
-		push @{$f{$vl}}, @{$v->{$vl}{$_}} foreach sort keys %{$v->{$vl}};
-	}
-	return \%f;
-}
-
 sub ranks {
 	my($v) = @_;
 	
