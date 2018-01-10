@@ -1,6 +1,15 @@
 package LIBLPH;
 use strict;
-
+my $version = '180109’;
+####
+#
+# This software library computes data fingerprints.
+# 
+# Copyright 2017 by Gustavo Glusman, Institute for Systems Biology, Seattle, WA, USA.
+# It is provided by the Institute for Systems Biology as open source software.
+# See the accompanying LICENSE file for information about the governing license.
+#
+####
 
 sub new {
 	my $package = shift;
@@ -42,8 +51,6 @@ sub recurseStructure {
 			#next unless $cargo;
 			#next if $key eq 'labels' && $o->{'max_labels_exceeded'}; # bdqc-specific tweak
 			my $vkey = $self->vector_value($key);
-			#my $value = ref $cargo ? $self->recurseStructure($cargo, $key, $vkey) : $self->vector_value($cargo);
-
 			my $value;
 			if (ref $cargo) {
 				$value = $self->recurseStructure($cargo, $key, $vkey);
