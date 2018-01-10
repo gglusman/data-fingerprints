@@ -10,7 +10,7 @@ Software for creating and comparing data fingerprints: locality-sensitive hashin
 2. Visualize. Example R code, where L is your fingerprint length:  
 	```
 	data <- read.table("collection", header=FALSE)  
-	M <- as.matrix(data[,3:L+2])  
+	M <- as.matrix(data[,2+1:L])  
 	pca <- prcomp(M, center=TRUE, scale.=TRUE)  
 	mag=c(sqrt(data[,2])/50)  
 	col=c(rep(grey(0,.5), length(data[,1])))  
