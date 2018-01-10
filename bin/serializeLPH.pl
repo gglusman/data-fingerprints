@@ -6,8 +6,7 @@ my $version = '180110';
 # This software serializes data fingerprints into a database for efficient searching.
 # 
 # Copyright 2017 by Gustavo Glusman, Institute for Systems Biology, Seattle, WA, USA.
-# It is provided by the Institute for Systems Biology as open source software,
-# free for non-commercial use.
+# It is provided by the Institute for Systems Biology as open source software.
 # See the accompanying LICENSE file for information about the governing license.
 #
 ####
