@@ -10,14 +10,14 @@ Software for creating and comparing data fingerprints: locality-sensitive hashin
 2. Visualize. Example R code, where L is your fingerprint length:  
 	```
 	data <- read.table("collection", header=FALSE)  
-	M <- as.matrix(data[,2+1:L])  
+	M <- as.matrix(data[,2 + 1:L])  
 	pca <- prcomp(M, center=TRUE, scale.=TRUE)  
 	mag=c(sqrt(data[,2])/50)  
 	col=c(rep(grey(0,.5), length(data[,1])))  
 	plot(pca$x[,1], pca$x[,2], pch=20, cex=mag, col=col, xlab='PC1', ylab='PC2')
 	
 	require(Rtsne)
-	tsne <- Rtsne(data[,3:L+2], dims=2, perplexity=50, verbose=TRUE, max_iter=500)
+	tsne <- Rtsne(data[,2 + 1:L], dims=2, perplexity=50, verbose=TRUE, max_iter=500)
 	plot(tsne$Y, main='tsne', pch=20, cex=mag, col=col)
 	```
 
