@@ -13,13 +13,13 @@ Software for creating and comparing data fingerprints: locality-sensitive hashin
 	`bin/serializeLPH.pl` _myFingerprintCollection fingerprintLength columnsToIgnore normalize @myListOfFingerprints_  
 	`bin/serializeLPH.pl` _myFingerprintCollection fingerprintLength columnsToIgnore normalize *.outn.gz_
 
-4. To compare a fingerprint to a database:  
-	`bin/searchLPHs.pl` _myGenome.outn.gz myFingerprintCollection_  
+4. [TBD] To compare a fingerprint to a database:  
+	`bin/searchLPHs.pl` _myFingerprint.outn.gz myFingerprintCollection_  
 
-5. To compare two databases:  
+5. [TBD] To compare two databases:  
 	`bin/searchLPHs.pl` _aFingerprintCollection anotherFingerprintCollection_
 
-6. To perform all-against-all comparisons in one database:  
+6. [TBD] To perform all-against-all comparisons in one database:  
 	`bin/searchLPHs.pl` _aFingerprintCollection_
 
 This project is conceptually related to (but distinct from) the Genome Fingerprints: https://github.com/gglusman/genome-fingerprints
