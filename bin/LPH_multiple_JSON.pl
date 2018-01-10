@@ -12,11 +12,11 @@ use strict;
 #
 ####
 #
-# The first parameter is the directory where the XML files are located.
+# The first parameter is the directory where the JSON objects are located.
 # The second parameter is the fingerprint size to be used.
 # The third parameter specifies whether fingerprints need to be normalized.
 #
-# The standard output consists of fingerprints of the XML objects in the directory, one per line.
+# The standard output consists of fingerprints of the JSON objects in the directory, one per line.
 # The first column is the identifier (filename).
 # The second column is the number of 'statements' observed while computing the fingerprint.
 # The remaining columns are the fingerprint itself.
@@ -27,7 +27,7 @@ use lib "/users/gglusman/proj/LPH";
 use LIBLPH;
 my $LPH = new LIBLPH;
 
-use XML::Simple qw(:strict);
+use JSON;
 my($dir, $L, $normalize) = @ARGV;
 $L ||= 50;
 $LPH->{'L'} = $L;
@@ -35,7 +35,18 @@ my(%cache, %cacheCount);
 my $decimals = 3;
 
 foreach my $scanfile (fulldirlist($dir)) {
-	my $content = XMLin($scanfile, ForceArray => 1, KeyAttr => 1);
+	if ($scanfile =~ /\.gz$/) {
+		open JF, "gunzip -c $scanfile.gz |";
+	} else {
+		open JF, $scanfile;
+	}
+	my @jsonContent = <JF>;
+	close JF;
+	chomp(@jsonContent);
+	my $jsonString = join("", @jsonContent);
+	next unless $jsonString;
+	$scanfile .= "Y" if $jsonString =~ /chrY/;
+	my $content = decode_json($jsonString);
 	
 	$LPH->resetFingerprint();
 	$LPH->recurseStructure($content);
