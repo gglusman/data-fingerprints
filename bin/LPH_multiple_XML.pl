@@ -28,7 +28,6 @@ use LIBLPH;
 my $LPH = new LIBLPH;
 
 use XML::Simple qw(:strict);
-my $table = "study_fields.tsv.gz";
 my($dir, $L, $normalize) = @ARGV;
 $L ||= 50;
 $LPH->{'L'} = $L;
@@ -36,10 +35,10 @@ my(%cache, %cacheCount);
 my $decimals = 3;
 
 foreach my $scanfile (fulldirlist($dir)) {
-	my $xmlref = XMLin($scanfile, ForceArray => 1, KeyAttr => 1);
+	my $content = XMLin($scanfile, ForceArray => 1, KeyAttr => 1);
 	
 	$LPH->resetFingerprint();
-	$LPH->recurseStructure($xmlref);
+	$LPH->recurseStructure($content);
 	my $fp;
 	if ($normalize) {
 		$fp = $LPH->normalize();
