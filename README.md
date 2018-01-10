@@ -8,13 +8,13 @@ Software for creating and comparing data fingerprints: locality-sensitive hashin
 	`bin/LPH_multiple_XML.pl` _directory fingerprintLength normalize_ > collection
 
 2. Visualize:  
-	a. Example R code, where L is your fingerprint length:  
-		data <- read.table("collection", header=FALSE)  
-		M <- as.matrix(data[,3:L+2])  
-		pca <- prcomp(M, center=TRUE, scale.=TRUE)  
-		mag=c(sqrt(data[,2])/50)  
-		col=c(rep(grey(0,.5), length(data[,1])))  
-		plot(pca$x[,1], pca$x[,2], pch=20, cex=mag, xlab='PC1', ylab='PC2')
+	Example R code, where L is your fingerprint length:  
+	`data <- read.table("collection", header=FALSE)  
+	M <- as.matrix(data[,3:L+2])  
+	pca <- prcomp(M, center=TRUE, scale.=TRUE)  
+	mag=c(sqrt(data[,2])/50)  
+	col=c(rep(grey(0,.5), length(data[,1])))  
+	plot(pca$x[,1], pca$x[,2], pch=20, cex=mag, xlab='PC1', ylab='PC2')`
 
 3. Serialize fingerprints into a database:  
 	`bin/serializeLPH.pl` _collection fingerprintLength columnsToIgnore normalize @myListOfFingerprints_  
