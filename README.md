@@ -2,10 +2,14 @@
 Software for creating and comparing data fingerprints: locality-sensitive hashing of arbitrary data in JSON or XML format.  
 
 1. Create fingerprints. L is the desired fingerprint length.  
-	a. From a a collection of JSON objects:  
+	a. From a a collection of JSON objects (one per file in a directory):  
 	`bin/LPH_multiple_JSON.pl` _directory L [normalize]_ > collection  
-	b. From a collection of XML files:  
-	`bin/LPH_multiple_XML.pl` _directory L [normalize]_ > collection
+	b. From a collection of XML files (one per file in a directory):  
+	`bin/LPH_multiple_XML.pl` _directory L [normalize]_ > collection  
+	c. From a a collection of JSON objects (in one file):  
+	`bin/LPH_JSON.pl` _file idField L [normalize]_ > collection  
+	d. From a collection of XML objects (in one file):  
+	`bin/LPH_XML.pl` _file idField L [normalize]_ > collection
 
 2. Visualize. Example R code, where L is your fingerprint length:  
 	```
