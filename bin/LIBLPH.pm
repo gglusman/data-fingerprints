@@ -15,7 +15,6 @@ sub new {
 	my $package = shift;
 
 	my $obj = {};
-	$obj->{'verbose'} = 0;
 	$obj->{'usecache'} = 1;
 	$obj->{'cache'} = {};
 	$obj->{'root'} = 'root';
@@ -39,27 +38,27 @@ sub resetFingerprint {
 
 sub recurseStructure {
 	my($self, $o, $name, $base) = @_;
+	my $skip_nulls = $self->{'skip_nulls'};
+	my $null = $self->{'null'};
+	unless ($null) {
+		$null = $self->{'null'} = join(",", 1, (0) x ($self->{'L'}-1));
+	}
+	
 	$name = $self->{'root'} unless defined $name;
 	$base = $self->vector_value(0) unless defined $base;
-	my $verbose = $self->{'verbose'};
 	my $fp = $self->{'fp'};
-	print join("\t", "#evaluating", $name, join(",", @$base)), "\n" if $verbose>1;
 	if (ref $o eq 'HASH') {
-		print join("\t", "##hash_content:", %$o), "\n" if $verbose>1;
 		my $keysUsed;
 		while (my($key, $cargo) = each %$o) {
-			#next unless $cargo;
 			#next if $key eq 'labels' && $o->{'max_labels_exceeded'}; # bdqc-specific tweak
 			my $vkey = $self->vector_value($key);
 			my $value;
 			if (ref $cargo) {
 				$value = $self->recurseStructure($cargo, $key, $vkey);
-			} elsif ($self->{'skip_nulls'} && !$cargo) {
-				next;
-			} else {
+			} elsif ($cargo || !$skip_nulls) {
 				$value = $self->vector_value($cargo);
 			}
-
+			next if $skip_nulls && (!$cargo || join(",", @$value) eq $null);
 			$self->add_vector_values($base, $vkey, $value, "#hash_entry", $name, $key, $cargo);
 			$keysUsed++;
 		}
@@ -70,12 +69,9 @@ sub recurseStructure {
 			# flattening uninformative extra structure layer
 			return $self->recurseStructure($o->[0], $name, $base);
 		}
-
-		print join("\t", "##array_content:", @$o), "\n" if $verbose>1;
 		my @values;
 		foreach my $i (0..$#$o) {
 			$values[$i] = ref $o->[$i] ? $self->recurseStructure($o->[$i], $i, $self->vector_value($i)) : $self->vector_value($o->[$i]);
-			print "####computing $i in array $name\n" if $verbose>2;
 		}
 		# add link to first element in array
 		$self->add_vector_values($base, $self->vector_value(0), $values[0], "#array_start", $name, 0, $o->[0]);
@@ -90,7 +86,6 @@ sub recurseStructure {
 	} else {
 		#0	JSON::PP::Boolean	(false)
 		#1	JSON::PP::Boolean	(true)
-		print join("\t", "##scalar_content:", $o, ref $o, $self->vector_value($o)), "\n" if $verbose>1;
 		#$self->{'statements'}++;
 		return $self->vector_value($o);
 	}
