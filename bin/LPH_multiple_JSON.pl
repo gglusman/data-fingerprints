@@ -37,6 +37,8 @@ my $decimals = 3;
 foreach my $scanfile (fulldirlist($dir)) {
 	if ($scanfile =~ /\.gz$/) {
 		open JF, "gunzip -c $scanfile.gz |";
+	} elsif ($scanfile =~ /\.bz2$/) {
+		open JF, "bzcat $scanfile.bz2 |";
 	} else {
 		open JF, $scanfile;
 	}
