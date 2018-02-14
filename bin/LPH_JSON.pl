@@ -36,9 +36,9 @@ my(%cache, %cacheCount);
 my $decimals = 3;
 
 if ($scanfile =~ /\.gz$/) {
-	open JF, "gunzip -c $scanfile.gz |";
+	open JF, "gunzip -c $scanfile |";
 } elsif ($scanfile =~ /\.bz2$/) {
-	open JF, "bzcat $scanfile.bz2 |";
+	open JF, "bzcat $scanfile |";
 } else {
 	open JF, $scanfile;
 }
