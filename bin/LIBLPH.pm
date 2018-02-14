@@ -100,6 +100,7 @@ sub add_vector_values {
 	my($self, $v1, $v2, $v3, @stuff) = @_;
 	my $L = $self->{'L'};
 	my $fp = $self->{'fp'};
+	
 	# adds the three vectors to the fingerprint, rotating v2 by 1 and v3 by 2, both to the left
 	foreach my $i (0..$L-1) {
 		my $v = ($v1->[$i] + $v2->[($i+1) % $L] + $v3->[($i+2) % $L])/3;
@@ -116,25 +117,26 @@ sub vector_value { #computes the value of the first argument in vector form
 	my($self, $o) = @_;
 	my $L = $self->{'L'};
 	my $smooth = $self->{'smooth'};
-	my @new;
 	my $cache = $self->{'cache'};
-
 	if ($self->{'usecache'} && defined $cache->{$o}) {
 		#$cacheCount{$o}++; ### could be used to selectively clean the cache as needed
 		return $cache->{$o};
 	}
 
+	my @new = (0) x $L;
+
 	if ($self->isnumeric($o) && $o !~ /^nan$/i) {
 		if ($smooth) {
 			my $over = $o - int($o);
 			$new[$o % $L] += 1-$over;
-			$new[($o+1) % $L] += $over;
+			$new[($o+1) % $L] += $over if $over;
 		} else {
 			$new[$o % $L]++;
 		}
 	} else {
 		my @chars = split //, $o;
-		foreach my $i (1..$#chars) { ## single-letter strings are essentially ignored
+		$new[ord($chars[0]) % $L]++;
+		foreach my $i (1..$#chars) {
 			$new[(ord($chars[$i-1])+ord($chars[$i])) % $L]++;
 		}
 	}
@@ -152,6 +154,7 @@ sub vector_value { #computes the value of the first argument in vector form
 	}
 
 	$cache->{$o} = \@new if $self->{'usecache'};
+	
 	return \@new;
 }
 
