@@ -23,7 +23,8 @@ use strict;
 #
 ####
 
-use lib "/users/gglusman/proj/LPH";
+use FindBin qw($Bin);
+use lib $Bin;
 use LIBLPH;
 my $LPH = new LIBLPH;
 
