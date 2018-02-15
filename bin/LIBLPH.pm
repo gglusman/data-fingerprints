@@ -84,9 +84,6 @@ sub recurseStructure {
 		$self->{'statements'} += 2+scalar @$o;
 		return $self->vector_value(scalar @$o);
 	} else {
-		#0	JSON::PP::Boolean	(false)
-		#1	JSON::PP::Boolean	(true)
-		#$self->{'statements'}++;
 		return $self->vector_value($o);
 	}
 }
