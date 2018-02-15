@@ -9,7 +9,9 @@ Software for creating and comparing data fingerprints: locality-sensitive hashin
 	c. From a a collection of JSON objects (in one file):  
 	`bin/LPH_JSON.pl` _file idField L [normalize]_ > collection  
 	d. From a collection of XML objects (in one file):  
-	`bin/LPH_XML.pl` _file idField L [normalize]_ > collection
+	`bin/LPH_XML.pl` _file idField L [normalize]_ > collection  
+	e. From a stream of JSON objects one-per-line (as in Wikidata):  
+	`bin/LPH_linewise_JSON.pl` _file idField L [normalize]_ > collection
 
 2. Visualize. Example R code, where L is your fingerprint length:  
 	```
