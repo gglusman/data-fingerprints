@@ -21,6 +21,7 @@ sub new {
 	$obj->{'L'} = 13;
 	$obj->{'smooth'} = 1;
 	$obj->{'skip_nulls'} = 1;
+	$obj->{'arrays_are_sets'} = 0;
 	$obj->{'statements'} = 0;
 	$obj->{'fp'} = [];
 	bless $obj, $package;
@@ -69,20 +70,39 @@ sub recurseStructure {
 			# flattening uninformative extra structure layer
 			return $self->recurseStructure($o->[0], $name, $base);
 		}
-		my @values;
-		foreach my $i (0..$#$o) {
-			$values[$i] = ref $o->[$i] ? $self->recurseStructure($o->[$i], $i, $self->vector_value($i)) : $self->vector_value($o->[$i]);
+		if ($self->{'arrays_are_sets'}) {
+			my $keysUsed;
+			foreach my $key (0..$#$o) {
+				my $cargo = $o->[$key];
+				my $vkey = $self->vector_value($key);
+				my $value;
+				if (ref $cargo) {
+					$value = $self->recurseStructure($cargo, $key, $vkey);
+				} elsif ($cargo || !$skip_nulls) {
+					$value = $self->vector_value($cargo);
+				}
+				next if $skip_nulls && (!$cargo || join(",", @$value) eq $null);
+				$self->add_vector_values($base, $vkey, $value, "#set_entry", $name, $key, $cargo);
+				$keysUsed++;
+			}
+			$self->{'statements'} += $keysUsed;
+			return $self->vector_value($keysUsed);
+		} else {
+			my @values;
+			foreach my $i (0..$#$o) {
+				$values[$i] = ref $o->[$i] ? $self->recurseStructure($o->[$i], $i, $self->vector_value($i)) : $self->vector_value($o->[$i]);
+			}
+			# add link to first element in array
+			$self->add_vector_values($base, $self->vector_value(0), $values[0], "#array_start", $name, 0, $o->[0]);
+			# add links between subsequent pairs of elements in array
+			foreach my $i (1..$#$o) {
+				$self->add_vector_values($base, $values[$i-1], $values[$i], "#array_pair", $name, $o->[$i-1], $o->[$i]);
+			}
+			# add link from last element in array
+			$self->add_vector_values($base, $values[$#$o], $self->vector_value(scalar @$o), "#array_end", $name, $o->[$#$o], scalar @$o);
+			$self->{'statements'} += 2+scalar @$o;
+			return $self->vector_value(scalar @$o);
 		}
-		# add link to first element in array
-		$self->add_vector_values($base, $self->vector_value(0), $values[0], "#array_start", $name, 0, $o->[0]);
-		# add links between subsequent pairs of elements in array
-		foreach my $i (1..$#$o) {
-			$self->add_vector_values($base, $values[$i-1], $values[$i], "#array_pair", $name, $o->[$i-1], $o->[$i]);
-		}
-		# add link from last element in array
-		$self->add_vector_values($base, $values[$#$o], $self->vector_value(scalar @$o), "#array_end", $name, $o->[$#$o], scalar @$o);
-		$self->{'statements'} += 2+scalar @$o;
-		return $self->vector_value(scalar @$o);
 	} else {
 		return $self->vector_value($o);
 	}
