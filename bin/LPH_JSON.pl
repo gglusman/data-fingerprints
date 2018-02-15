@@ -31,6 +31,7 @@ my $LPH = new LIBLPH;
 
 use JSON;
 my($scanfile, $idField, $L, $normalize) = @ARGV;
+die "Usage: $0 file_to_scan id_field L normalize\n" unless $scanfile && -e $scanfile;
 $L ||= 50;
 $LPH->{'L'} = $L;
 my(%cache, %cacheCount);
@@ -47,7 +48,7 @@ my @jsonContent = <JF>;
 close JF;
 chomp(@jsonContent);
 my $jsonString = join("", @jsonContent);
-next unless $jsonString;
+die "No content in file $scanfile\n" unless $jsonString;
 my $content = decode_json($jsonString);
 
 foreach my $entry (@$content) {

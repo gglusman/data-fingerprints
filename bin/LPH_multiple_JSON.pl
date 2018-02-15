@@ -30,6 +30,7 @@ my $LPH = new LIBLPH;
 
 use JSON;
 my($dir, $L, $normalize) = @ARGV;
+die "Usage: $0 dir_to_scan L normalize\n" unless $dir && -e $dir;
 $L ||= 50;
 $LPH->{'L'} = $L;
 my(%cache, %cacheCount);

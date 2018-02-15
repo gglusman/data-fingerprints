@@ -30,6 +30,7 @@ my $LPH = new LIBLPH;
 
 use XML::Simple qw(:strict);
 my($dir, $L, $normalize) = @ARGV;
+die "Usage: $0 dir_to_scan id_field L normalize\n" unless $dir && -e $dir;
 $L ||= 50;
 $LPH->{'L'} = $L;
 my(%cache, %cacheCount);
