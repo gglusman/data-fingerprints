@@ -1,6 +1,6 @@
 package LIBLPH;
 use strict;
-my $version = '180215';
+my $version = '180222';
 ####
 #
 # This software library computes data fingerprints.
@@ -18,12 +18,12 @@ sub new {
 	$obj->{'usecache'} = 1;
 	$obj->{'cache'} = {};
 	$obj->{'root'} = 'root';
-	$obj->{'L'} = 13;
+	$obj->{'L'} = "11,13";
 	$obj->{'numeric_encoding'} = 'smooth'; # ME, ML, smooth, [default]
 	$obj->{'skip_nulls'} = 1;
 	$obj->{'arrays_are_sets'} = 0;
 	$obj->{'statements'} = 0;
-	$obj->{'fp'} = [];
+	$obj->{'fp'} = {};
 	bless $obj, $package;
 	return $obj;
 }
@@ -31,19 +31,35 @@ sub new {
 sub resetFingerprint {
 	my($self) = @_;
 
-	$self->{'fp'} = [];
-	$self->{'norm'} = [];
+	$self->{'fp'} = {};
+	$self->{'norm'} = {};
 	$self->{'statements'} = 0;
 }
 
+sub setLs {
+	my($self, $Ls) = @_;
+	
+	$Ls ||= $self->{'L'};
+	my %Ls;
+	foreach my $L (split /[,\s]+/, $Ls) {
+		if ($L =~ /^[0-9]+$/ && $L>1) {
+			$Ls{$L}++;
+		}
+	}
+	my @Ls = sort {$a<=>$b} keys %Ls;
+	die "Cannot interpret fingerprint lengths in \"$Ls\"\n" unless @Ls;
+	$self->{'_L'} = \@Ls;
+	
+	my %null;
+	$null{$_} = join(",", (0) x $_) foreach @Ls;
+	return $self->{'null'} = \%null;
+}
 
 sub recurseStructure {
 	my($self, $o, $name, $base) = @_;
 	my $skip_nulls = $self->{'skip_nulls'};
 	my $null = $self->{'null'};
-	unless ($null) {
-		$null = $self->{'null'} = join(",", 1, (0) x ($self->{'L'}-1));
-	}
+	$null = $self->setLs() unless defined $null;
 	
 	$name = $self->{'root'} unless defined $name;
 	$base = $self->vector_value(0) unless defined $base;
@@ -56,10 +72,11 @@ sub recurseStructure {
 			my $value;
 			if (ref $cargo) {
 				$value = $self->recurseStructure($cargo, $key, $vkey);
-			} elsif ($cargo || !$skip_nulls) {
+			} elsif (!$cargo && $skip_nulls) {
+				next;
+			} else {
 				$value = $self->vector_value($cargo);
 			}
-			next if $skip_nulls && (!$cargo || join(",", @$value) eq $null);
 			$self->add_vector_values($base, $vkey, $value, "#hash_entry", $name, $key, $cargo);
 			$keysUsed++;
 		}
@@ -73,15 +90,16 @@ sub recurseStructure {
 		if ($self->{'arrays_are_sets'}) {
 			my $keysUsed;
 			foreach my $key (0..$#$o) {
-				my $cargo = $o->[$key];
+				my $cargo = $o->[$key]; ### not actually correct
 				my $vkey = $self->vector_value($key);
 				my $value;
 				if (ref $cargo) {
 					$value = $self->recurseStructure($cargo, $key, $vkey);
-				} elsif ($cargo || !$skip_nulls) {
+				} elsif (!$cargo && $skip_nulls) {
+					next;
+				} else {
 					$value = $self->vector_value($cargo);
 				}
-				next if $skip_nulls && (!$cargo || join(",", @$value) eq $null);
 				$self->add_vector_values($base, $vkey, $value, "#set_entry", $name, $key, $cargo);
 				$keysUsed++;
 			}
@@ -110,13 +128,16 @@ sub recurseStructure {
 
 sub add_vector_values {
 	my($self, $v1, $v2, $v3, @stuff) = @_;
-	my $L = $self->{'L'};
+	my $Ls = $self->{'_L'};
 	my $fp = $self->{'fp'};
 	
 	# adds the three vectors to the fingerprint, rotating v2 by 1 and v3 by 2, both to the left
-	foreach my $i (0..$L-1) {
-		my $v = ($v1->[$i] + $v2->[($i+1) % $L] + $v3->[($i+2) % $L])/3;
-		$fp->[$i] += $v;
+	### need to implement a more meaningful method
+	foreach my $L (@$Ls) {
+		foreach my $i (0..$L-1) {
+			my $v = ($v1->{$L}[$i] + $v2->{$L}[($i+1) % $L] + $v3->{$L}[($i+2) % $L])/3;
+			$fp->{$L}[$i] += $v;
+		}
 	}
 }
 
@@ -137,92 +158,111 @@ sub isnumeric ($) {
 
 sub vector_value { #computes the value of the first argument in vector form
 	my($self, $o) = @_;
-	my $L = $self->{'L'};
 	my $cache = $self->{'cache'};
 	if ($self->{'usecache'} && defined $cache->{$o}) {
 		#$cacheCount{$o}++; ### could be used to selectively clean the cache as needed
 		return $cache->{$o};
 	}
-
-	my @new = (0) x $L;
+	my $null = $self->{'null'};
+	$null = $self->setLs() unless defined $null;
+	my $Ls = $self->{'_L'};
+	my $new;
+	@{$new->{$_}} = split /,/, $null->{$_} foreach @$Ls;
 
 	if ($self->isnumeric($o) && $o !~ /^nan$/i) {
 		my $encoding = $self->{'numeric_encoding'};
-		if ($encoding eq 'ME') { # Mantissa/Exponent
+		if (!$o) {
+			#just keep the null value
+		} elsif ($encoding eq 'ME') { # Mantissa/Exponent
 			$_ = sprintf("%e", $o);
 			my($mantissa, $exponent) = /(\-?[\d\.]+)e([\+\-]\d+)/;
 			$mantissa /= 10;
 			
-			#encode the mantissa - a fraction, range (-1..1)
-			$mantissa *= $L;
-			if (my $over = abs($mantissa - int($mantissa))) {
-				$new[$mantissa % $L] += 1-$over;
-				$new[($mantissa+($mantissa>0 ? 1 : -1)) % $L] += $over;
-			} else {
-				$new[$mantissa % $L]++;
+			foreach my $L (@$Ls) {
+				#encode the mantissa - a fraction, range (-1..1)
+				$mantissa *= $L;
+				if (my $over = abs($mantissa - int($mantissa))) {
+					$new->{$L}[$mantissa % $L] += 1-$over;
+					$new->{$L}[($mantissa+($mantissa>0 ? 1 : -1)) % $L] += $over;
+				} else {
+					$new->{$L}[$mantissa % $L]++;
+				}
+				#encode the exponent - an integer, which can be negative
+				$new->{$L}[$exponent % $L]++; ##this gives equal weight to the mantissa and the exponent
 			}
-			
-			#encode the exponent - an integer, which can be negative
-			$new[$exponent % $L]++; ##this gives equal weight to the mantissa and the exponent
 		} elsif ($encoding eq 'ML') { # Mantissa/Log value
 			$_ = sprintf("%e", $o);
 			my($mantissa, $exponent) = /(\-?[\d\.]+)e([\+\-]\d+)/;
 			$mantissa /= 10;
 			
-			#encode the mantissa - a fraction, range (-1..1)
-			$mantissa *= $L;
-			if (my $over = abs($mantissa - int($mantissa))) {
-				$new[$mantissa % $L] += 1-$over;
-				$new[($mantissa+($mantissa>0 ? 1 : -1)) % $L] += $over;
-			} else {
-				$new[$mantissa % $L]++;
+			foreach my $L (@$Ls) {
+				#encode the mantissa - a fraction, range (-1..1)
+				$mantissa *= $L;
+				if (my $over = abs($mantissa - int($mantissa))) {
+					$new->{$L}[$mantissa % $L] += 1-$over;
+					$new->{$L}[($mantissa+($mantissa>0 ? 1 : -1)) % $L] += $over;
+				} else {
+					$new->{$L}[$mantissa % $L]++;
+				}
 			}
-			
 			#encode the log absolute value - which can be negative
-			my $logvalue;
-			$logvalue = log(abs($o)) if $o;
-			if (my $over = abs($logvalue - int($logvalue))) {
-				$new[$logvalue % $L] += 1-$over;
-				$new[($logvalue+($logvalue>0 ? 1 : -1)) % $L] += $over;
-			} else {
-				$new[$logvalue % $L]++;
+			if ($o) {
+				my $logvalue = log(abs($o));
+				foreach my $L (@$Ls) {
+					if (my $over = abs($logvalue - int($logvalue))) {
+						$new->{$L}[$logvalue % $L] += 1-$over;
+						$new->{$L}[($logvalue+($logvalue>0 ? 1 : -1)) % $L] += $over;
+					} else {
+						$new->{$L}[$logvalue % $L]++;
+					}
+				}
 			}
 		} elsif ($encoding eq 'smooth') {
 			my $over = $o - int($o);
-			$new[$o % $L] += 1-$over;
-			$new[($o+1) % $L] += $over if $over;
+			foreach (@$Ls) {
+				$new->{$_}[$o % $_] += 1-$over;
+				$new->{$_}[($o+1) % $_] += $over if $over;
+			}
 		} else {
-			$new[$o % $L]++;
+			$new->{$_}[$o % $_]++ foreach @$Ls;
 		}
 	} else {
 		my @chars = split //, $o;
-		$new[ord($chars[0]) % $L]++;
+		$new->{$_}[ord($chars[0]) % $_]++ foreach @$Ls;
 		foreach my $i (1..$#chars) {
-			$new[(ord($chars[$i-1])+ord($chars[$i])) % $L]++;
+			my $v = ord($chars[$i-1])+ord($chars[$i]);
+			$new->{$_}[$v % $_]++ foreach @$Ls;
 		}
 	}
-
-	my($min, $total);
-	foreach (@new) {
-		$min = $_ || 0 if $min>$_ || !defined $min;
-		last if $min==0;
-	}
-	if ($min) { $_ -= $min foreach @new }
-	$total += $_ foreach @new;
-	@new = map {$_/$total} @new if $total;
-
-	$cache->{$o} = \@new if $self->{'usecache'};
 	
-	return \@new;
+	foreach my $L (@$Ls) {
+		my($min, $total);
+		foreach (@{$new->{$L}}) {
+			$min = $_ || 0 if $min>$_ || !defined $min;
+			last if $min==0;
+		}
+		if ($min) { $_ -= $min foreach @{$new->{$L}} }
+		$total += $_ foreach @{$new->{$L}};
+		@{$new->{$L}} = map {$_/$total} @{$new->{$L}} if $total;
+	}
+
+	$cache->{$o} = $new if $self->{'usecache'};
+	return $new;
 }
 
 sub normalize {
 	my($self) = @_;
+	my $Ls = $self->{'_L'};
 	my $fp = $self->{'fp'};
-	my @norm;
-	my($avg, $std) = $self->avgstd($fp);
-	foreach (0..$#$fp) { $norm[$_] = ($fp->[$_]-$avg)/$std }
-	return $self->{'norm'} = \@norm;
+	my $null = $self->{'null'};
+	my $norm;
+	@{$norm->{$_}} = split /,/, $null->{$_} foreach @$Ls;
+	foreach my $L (@$Ls) {
+		my($avg, $std) = $self->avgstd($fp->{$L});
+		foreach (0..$L-1) { $norm->{$L}[$_] = ($fp->{$L}[$_]-$avg)/$std }
+	}
+	
+	return $self->{'norm'} = $norm;
 }
 
 sub avgstd {

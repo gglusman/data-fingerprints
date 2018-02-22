@@ -51,17 +51,21 @@ while (<JF>) {
 	s/\,$//;
 	my $entry = decode_json($_);
 	my $id = $entry->{$idField};
-	die "No $idField field found\n" unless defined $id;
+	next unless defined $id;
 	delete $entry->{$idField};
 	$LPH->resetFingerprint();
 	$LPH->recurseStructure($entry);
+	next unless $LPH->{'statements'};
 	my $fp;
 	if ($normalize) {
 		$fp = $LPH->normalize();
 	} else {
 		$fp = $LPH->{'fp'};
 	}
-	print join("\t", $id, $LPH->{'statements'}, map {sprintf("%.${decimals}f", $fp->[$_])} (0..$L-1)), "\n";
+	my @v;
+	push @v, @{$fp->{$_}} foreach sort {$a<=>$b} keys %$fp;
+	$id =~ s/[^A-Z0-9_\.\-\=,\+\*:;\@\^\`\|\~]+//gi;
+	print join("\t", $id, $LPH->{'statements'}, map {sprintf("%.${decimals}f", $_)} @v), "\n";
 }
 
 close JF;
