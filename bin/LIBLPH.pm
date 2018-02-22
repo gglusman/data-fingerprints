@@ -19,7 +19,7 @@ sub new {
 	$obj->{'cache'} = {};
 	$obj->{'root'} = 'root';
 	$obj->{'L'} = 13;
-	$obj->{'smooth'} = 1;
+	$obj->{'numeric_encoding'} = 'smooth'; # ME, ML, smooth, [default]
 	$obj->{'skip_nulls'} = 1;
 	$obj->{'arrays_are_sets'} = 0;
 	$obj->{'statements'} = 0;
@@ -122,13 +122,22 @@ sub add_vector_values {
 
 sub isnumeric ($) {
 	no warnings;
-	return $_[1] eq ($_[1]+0);
+	my $v = $_[1];
+	if (substr($v,0,1) eq '.') {
+		return "0$v" eq $v+0;
+	} elsif ($v =~ /^([\-\+])\.(.+)/) {
+		return "${1}0.$2" eq $v+0;
+	} else {
+		return $v eq $v+0;
+	}
+	
+	# simplistic version, which fails for representations like .2, -.5:
+	#return $_[1] eq ($_[1]+0);
 }
 
 sub vector_value { #computes the value of the first argument in vector form
 	my($self, $o) = @_;
 	my $L = $self->{'L'};
-	my $smooth = $self->{'smooth'};
 	my $cache = $self->{'cache'};
 	if ($self->{'usecache'} && defined $cache->{$o}) {
 		#$cacheCount{$o}++; ### could be used to selectively clean the cache as needed
@@ -138,7 +147,47 @@ sub vector_value { #computes the value of the first argument in vector form
 	my @new = (0) x $L;
 
 	if ($self->isnumeric($o) && $o !~ /^nan$/i) {
-		if ($smooth) {
+		my $encoding = $self->{'numeric_encoding'};
+		if ($encoding eq 'ME') { # Mantissa/Exponent
+			$_ = sprintf("%e", $o);
+			my($mantissa, $exponent) = /(\-?[\d\.]+)e([\+\-]\d+)/;
+			$mantissa /= 10;
+			
+			#encode the mantissa - a fraction, range (-1..1)
+			$mantissa *= $L;
+			if (my $over = abs($mantissa - int($mantissa))) {
+				$new[$mantissa % $L] += 1-$over;
+				$new[($mantissa+($mantissa>0 ? 1 : -1)) % $L] += $over;
+			} else {
+				$new[$mantissa % $L]++;
+			}
+			
+			#encode the exponent - an integer, which can be negative
+			$new[$exponent % $L]++; ##this gives equal weight to the mantissa and the exponent
+		} elsif ($encoding eq 'ML') { # Mantissa/Log value
+			$_ = sprintf("%e", $o);
+			my($mantissa, $exponent) = /(\-?[\d\.]+)e([\+\-]\d+)/;
+			$mantissa /= 10;
+			
+			#encode the mantissa - a fraction, range (-1..1)
+			$mantissa *= $L;
+			if (my $over = abs($mantissa - int($mantissa))) {
+				$new[$mantissa % $L] += 1-$over;
+				$new[($mantissa+($mantissa>0 ? 1 : -1)) % $L] += $over;
+			} else {
+				$new[$mantissa % $L]++;
+			}
+			
+			#encode the log absolute value - which can be negative
+			my $logvalue;
+			$logvalue = log(abs($o)) if $o;
+			if (my $over = abs($logvalue - int($logvalue))) {
+				$new[$logvalue % $L] += 1-$over;
+				$new[($logvalue+($logvalue>0 ? 1 : -1)) % $L] += $over;
+			} else {
+				$new[$logvalue % $L]++;
+			}
+		} elsif ($encoding eq 'smooth') {
 			my $over = $o - int($o);
 			$new[$o % $L] += 1-$over;
 			$new[($o+1) % $L] += $over if $over;
@@ -154,16 +203,13 @@ sub vector_value { #computes the value of the first argument in vector form
 	}
 
 	my($min, $total);
-	foreach (@new) { $min = $_ || 0 if $min>$_ || !defined $min }
-	foreach my $i (0..$#new) {
-		$new[$i] -= $min if $min;
-		$total += $new[$i];
+	foreach (@new) {
+		$min = $_ || 0 if $min>$_ || !defined $min;
+		last if $min==0;
 	}
-	if ($total) {
-		@new = map {$_/$total} @new;
-	} else {
-		@new = ();
-	}
+	if ($min) { $_ -= $min foreach @new }
+	$total += $_ foreach @new;
+	@new = map {$_/$total} @new if $total;
 
 	$cache->{$o} = \@new if $self->{'usecache'};
 	
