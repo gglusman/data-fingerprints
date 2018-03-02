@@ -56,7 +56,7 @@ close TB;
 
 
 sub fulldirlist {
-	my($self, $dir) = @_;
+	my($dir) = @_;
 	opendir (DIR, $dir);
 	my @files = grep /^[^.]/, readdir DIR;
 	closedir DIR;
