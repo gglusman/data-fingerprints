@@ -90,8 +90,8 @@ sub recurseStructure {
 		if ($self->{'arrays_are_sets'}) {
 			my $keysUsed;
 			foreach my $key (0..$#$o) {
-				my $cargo = $o->[$key]; ### not actually correct
-				my $vkey = $self->vector_value($key);
+				my $cargo = $o->[$key];
+				my $vkey = $self->vector_value(0); # all positions in array get the same key -> a set
 				my $value;
 				if (ref $cargo) {
 					$value = $self->recurseStructure($cargo, $key, $vkey);
