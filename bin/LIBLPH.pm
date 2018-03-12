@@ -118,7 +118,7 @@ sub recurseStructure {
 			}
 			# add link from last element in array
 			$self->add_vector_values($base, $values[$#$o], $self->vector_value(scalar @$o), "#array_end", $name, $o->[$#$o], scalar @$o);
-			$self->{'statements'} += 2+scalar @$o;
+			$self->{'statements'} += 1+scalar @$o;
 			return $self->vector_value(scalar @$o);
 		}
 	} else {
@@ -133,6 +133,8 @@ sub add_vector_values {
 	
 	# adds the three vectors to the fingerprint, rotating v2 by 1 and v3 by 2, both to the left
 	### need to implement a more meaningful method
+	### this method yields identical fingerprints when swapping internal items in an ordered array,
+	### e.g., a,b,c,d and a,c,b,d end up being identical
 	foreach my $L (@$Ls) {
 		foreach my $i (0..$L-1) {
 			my $v = ($v1->{$L}[$i] + $v2->{$L}[($i+1) % $L] + $v3->{$L}[($i+2) % $L])/3;
@@ -235,6 +237,7 @@ sub vector_value { #computes the value of the first argument in vector form
 		}
 	}
 	
+	#stretch the value and scale to a total of 1
 	foreach my $L (@$Ls) {
 		my($min, $total);
 		foreach (@{$new->{$L}}) {
