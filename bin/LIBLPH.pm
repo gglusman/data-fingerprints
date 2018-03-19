@@ -1,6 +1,6 @@
 package LIBLPH;
 use strict;
-my $version = '180222';
+my $version = '180319';
 ####
 #
 # This software library computes data fingerprints.
@@ -83,9 +83,13 @@ sub recurseStructure {
 		$self->{'statements'} += $keysUsed;
 		return $self->vector_value($keysUsed);
 	} elsif (ref $o eq 'ARRAY') {
-		if (1==scalar @$o && ref $o->[0]) {
+		if (1==scalar @$o) {
 			# flattening uninformative extra structure layer
-			return $self->recurseStructure($o->[0], $name, $base);
+			if (ref $o->[0]) {
+				return $self->recurseStructure($o->[0], $name, $base);
+			} else {
+				return $self->vector_value($o->[0]);
+			}
 		}
 		if ($self->{'arrays_are_sets'}) {
 			my $keysUsed;
