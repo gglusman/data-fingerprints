@@ -37,7 +37,7 @@ my(%cache, %cacheCount);
 my $decimals = 3;
 
 foreach my $scanfile (fulldirlist($dir)) {
-	my $content = XMLin($scanfile, ForceArray => 1, KeyAttr => 1);
+	my $content = XMLin("$dir/$scanfile", ForceArray => 1, KeyAttr => 1);
 	
 	$LPH->resetFingerprint();
 	$LPH->recurseStructure($content);
