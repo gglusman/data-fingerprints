@@ -38,18 +38,17 @@ my $decimals = 3;
 
 foreach my $scanfile (fulldirlist($dir)) {
 	if ($scanfile =~ /\.gz$/) {
-		open JF, "gunzip -c $scanfile |";
+		open JF, "gunzip -c $dir/$scanfile |";
 	} elsif ($scanfile =~ /\.bz2$/) {
-		open JF, "bzcat $scanfile |";
+		open JF, "bzcat $dir/$scanfile |";
 	} else {
-		open JF, $scanfile;
+		open JF, "$dir/$scanfile";
 	}
 	my @jsonContent = <JF>;
 	close JF;
 	chomp(@jsonContent);
 	my $jsonString = join("", @jsonContent);
 	next unless $jsonString;
-	$scanfile .= "Y" if $jsonString =~ /chrY/;
 	my $content = decode_json($jsonString);
 	
 	$LPH->resetFingerprint();

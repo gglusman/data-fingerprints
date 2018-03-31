@@ -19,7 +19,7 @@ sub new {
 	$obj->{'cache'} = {};
 	$obj->{'root'} = 'root';
 	$obj->{'L'} = "11,13";
-	$obj->{'numeric_encoding'} = 'smooth'; # ME, ML, smooth, [default]
+	$obj->{'numeric_encoding'} = 'ME'; # ME, ML, smooth, simple [default if given null option]
 	$obj->{'skip_nulls'} = 1;
 	$obj->{'arrays_are_sets'} = 0;
 	$obj->{'statements'} = 0;
@@ -145,6 +145,11 @@ sub add_vector_values {
 			$fp->{$L}[$i] += $v;
 		}
 	}
+	
+	if ($self->{'debug'}) {
+		print join("\t", map({sprintf("%.3f", $_)} @{$fp->{$Ls->[0]}}), @stuff), "\n";
+	}
+	
 }
 
 sub isnumeric ($) {

@@ -36,6 +36,7 @@ $L ||= 50;
 $LPH->{'L'} = $L;
 my(%cache, %cacheCount);
 my $decimals = 3;
+$LPH->{'debug'} = 1;
 
 if ($scanfile =~ /\.gz$/) {
 	open JF, "gunzip -c $scanfile |";
