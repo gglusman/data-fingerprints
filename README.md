@@ -1,5 +1,7 @@
 # data-fingerprints
-Software for creating and comparing data fingerprints: locality-sensitive hashing of arbitrary data in JSON or XML format.  
+Software for creating and comparing data fingerprints: locality-sensitive hashing of semi-structured data in JSON or XML format.  
+More information and datasets: http://db.systemsbiology.net/gestalt/data_fingerprints/  
+Preprint: https://www.biorxiv.org/content/early/2018/04/02/293183  
 
 1. Create fingerprints. L is the desired fingerprint length.  
 	a. From a a collection of JSON objects (one per file in a directory):  
