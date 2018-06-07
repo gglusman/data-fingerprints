@@ -263,6 +263,13 @@ sub vector_value { #computes the value of the first argument in vector form
 	return $new;
 }
 
+sub clear_cache {
+	my($self) = @_;
+	
+	$self->{'cache'} = {};
+}
+
+
 sub normalize {
 	my($self) = @_;
 	my $Ls = $self->{'_L'};
