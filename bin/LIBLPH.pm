@@ -83,6 +83,7 @@ sub recurseStructure {
 		$self->{'statements'} += $keysUsed;
 		return $self->vector_value($keysUsed);
 	} elsif (ref $o eq 'ARRAY') {
+		return unless @$o;
 		if (1==scalar @$o) {
 			# flattening uninformative extra structure layer
 			if (ref $o->[0]) {
