@@ -20,9 +20,12 @@ sub new {
 	$obj->{'root'} = 'root';
 	$obj->{'L'} = "11,13";
 	$obj->{'numeric_encoding'} = 'ME'; # ME, ML, smooth, simple [default if given null option]
+	$obj->{'string_encoding'} = 'decay';
+	$obj->{'string_encoding_decay'} = 0.1;
 	$obj->{'skip_nulls'} = 1;
 	$obj->{'arrays_are_sets'} = 0;
 	$obj->{'statements'} = 0;
+	$obj->{'debug'} = 6;
 	$obj->{'fp'} = {};
 	bless $obj, $package;
 	return $obj;
@@ -31,6 +34,7 @@ sub new {
 sub resetFingerprint {
 	my($self) = @_;
 
+	print "#resetFingerprint()\n" if $self->{'debug'};
 	$self->{'fp'} = {};
 	$self->{'norm'} = {};
 	$self->{'statements'} = 0;
@@ -40,6 +44,7 @@ sub setLs {
 	my($self, $Ls) = @_;
 	
 	$Ls ||= $self->{'L'};
+	print "#setLs($Ls)\n" if $self->{'debug'};
 	my %Ls;
 	foreach my $L (split /[,\s]+/, $Ls) {
 		if ($L =~ /^[0-9]+$/ && $L>1) {
@@ -62,6 +67,7 @@ sub recurseStructure {
 	$null = $self->setLs() unless defined $null;
 	
 	$name = $self->{'root'} unless defined $name;
+	print "#recursing: $o $name\n" if $self->{'debug'}>1;
 	$base = $self->vector_value(0) unless defined $base;
 	my $fp = $self->{'fp'};
 	if (ref $o eq 'HASH') {
@@ -136,6 +142,7 @@ sub add_vector_values {
 	my $Ls = $self->{'_L'};
 	my $fp = $self->{'fp'};
 	
+	print join("\t", "#adding vector values", @stuff), "\n" if $self->{'debug'}>2;
 	# adds the three vectors to the fingerprint, rotating v2 by 1 and v3 by 2, both to the left
 	### need to implement a more meaningful method
 	### this method yields identical fingerprints when swapping internal items in an ordered array,
@@ -147,8 +154,8 @@ sub add_vector_values {
 		}
 	}
 	
-	if ($self->{'debug'}) {
-		print join("\t", map({sprintf("%.3f", $_)} @{$fp->{$Ls->[0]}}), @stuff), "\n";
+	if ($self->{'debug'}>2) {
+		print join("\t", "#result:", map({sprintf("%.3f", $_)} @{$fp->{$Ls->[0]}})), "\n";
 	}
 	
 }
@@ -173,6 +180,7 @@ sub vector_value { #computes the value of the first argument in vector form
 	my $cache = $self->{'cache'};
 	if ($self->{'usecache'} && defined $cache->{$o}) {
 		#$cacheCount{$o}++; ### could be used to selectively clean the cache as needed
+		print "#cached: $o\n" if $self->{'debug'}>3;
 		return $cache->{$o};
 	}
 	my $null = $self->{'null'};
@@ -181,6 +189,8 @@ sub vector_value { #computes the value of the first argument in vector form
 	my $new;
 	@{$new->{$_}} = split /,/, $null->{$_} foreach @$Ls;
 
+	print "#computing vector_value($o)\n" if $self->{'debug'}>2;
+	
 	if ($self->isnumeric($o) && $o !~ /^nan$/i) {
 		my $encoding = $self->{'numeric_encoding'};
 		if (!$o) {
@@ -239,13 +249,36 @@ sub vector_value { #computes the value of the first argument in vector form
 			$new->{$_}[$o % $_]++ foreach @$Ls;
 		}
 	} else {
+		my $encoding = $self->{'string_encoding'};
 		my @chars = split //, $o;
-		$new->{$_}[ord($chars[0]) % $_]++ foreach @$Ls;
-		foreach my $i (1..$#chars) {
-			my $v = ord($chars[$i-1])+ord($chars[$i]);
-			$new->{$_}[$v % $_]++ foreach @$Ls;
+		my @ords = map(ord, @chars);
+		#$self->{'hist'}[$_]++ foreach @ords;
+		
+		if ($encoding eq 'pair_sum') {
+			$new->{$_}[$ords[0] % $_]++ foreach @$Ls;
+			foreach my $i (1..$#chars) {
+				my $v = $ords[$i] + $ords[$i-1];
+				$new->{$_}[$v % $_]++ foreach @$Ls;
+			}
+		} elsif ($encoding eq 'decay') {
+			my $decay = $self->{'string_encoding_decay'} || 0.1;
+			my $remain = 1-$decay;
+			$new->{$_}[$ords[0] % $_]++ foreach @$Ls;
+			my $v = $ords[0];
+			foreach my $i (1..$#chars) {
+				$v = $v*$remain + $ords[$i]*$decay;
+				print join("\t", "#decay", $o, $i, $ords[$i], $v), "\n" if $self->{'debug'}>5;
+				foreach my $L (@$Ls) {
+					my $sv = $v*$L/10;
+					my $over = $sv - int($sv);
+					$new->{$L}[$sv % $L] += 1-$over;
+					$new->{$L}[($sv+1) % $L] += $over if $over;
+				}
+			}
 		}
 	}
+	
+	print join("\t", "#prelim:", map({sprintf("%.3f", $_)} @{$new->{$Ls->[0]}}), "sum:", $self->sum($new->{$Ls->[0]})), "\n" if $self->{'debug'}>2;
 	
 	#stretch the value and scale to a total of 1
 	foreach my $L (@$Ls) {
@@ -259,6 +292,8 @@ sub vector_value { #computes the value of the first argument in vector form
 		@{$new->{$L}} = map {$_/$total} @{$new->{$L}} if $total;
 	}
 
+	print join("\t", "#final.:", map({sprintf("%.3f", $_)} @{$new->{$Ls->[0]}}), "sum:", $self->sum($new->{$Ls->[0]})), "\n" if $self->{'debug'}>2;
+
 	$cache->{$o} = $new if $self->{'usecache'};
 	return $new;
 }
@@ -266,12 +301,14 @@ sub vector_value { #computes the value of the first argument in vector form
 sub clear_cache {
 	my($self) = @_;
 	
+	print "#clear_cache()\n" if $self->{'debug'};
 	$self->{'cache'} = {};
 }
 
 
 sub normalize {
 	my($self) = @_;
+	print "#normalize()\n" if $self->{'debug'};
 	my $Ls = $self->{'_L'};
 	my $fp = $self->{'fp'};
 	my $null = $self->{'null'};
@@ -282,6 +319,8 @@ sub normalize {
 		foreach (0..$L-1) { $norm->{$L}[$_] = ($fp->{$L}[$_]-$avg)/$std }
 	}
 	
+	#print join("\t", "#normal:", map({sprintf("%.3f", $_)} @{$norm->{$Ls->[0]}}), "sum:", $self->sum($norm->{$Ls->[0]})), "\n" if $self->{'debug'}>2;
+
 	return $self->{'norm'} = $norm;
 }
 
@@ -297,6 +336,16 @@ sub avgstd {
 	my $std = sqrt($devsqsum/($n-1));
 	return $avg, $std;
 }
+
+sub sum {
+	my($self, $values) = @_;
+	
+	my $total;
+	$total += $_ foreach @$values;
+	return $total;
+}
+
+
 
 1;
 

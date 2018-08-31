@@ -64,7 +64,6 @@ foreach my $scanfile (fulldirlist($dir)) {
 	push @v, @{$fp->{$_}} foreach sort {$a<=>$b} keys %$fp;
 	print join("\t", $scanfile, $LPH->{'statements'}, map {sprintf("%.${decimals}f", $_)} @v), "\n";
 }
-close TB;
 
 
 sub fulldirlist {
