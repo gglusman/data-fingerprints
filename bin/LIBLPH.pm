@@ -1,6 +1,6 @@
 package LIBLPH;
 use strict;
-my $version = '180319';
+my $version = '180913';
 ####
 #
 # This software library computes data fingerprints.
@@ -27,6 +27,8 @@ sub new {
 	$obj->{'statements'} = 0;
 	$obj->{'debug'} = 0;
 	$obj->{'fp'} = {};
+	#$obj->{'exclude'}{'keys'} = {'CommentsCorrectionsList' => 1, 'MeshHeadingList' => 1};
+	
 	bless $obj, $package;
 	return $obj;
 }
@@ -60,6 +62,14 @@ sub setLs {
 	return $self->{'null'} = \%null;
 }
 
+sub excludeKey {
+	my($self, $key) = @_;
+	
+	return 1 if $self->{'exclude'}{'all'}{$key} || $self->{'exclude'}{'keys'}{$key};
+}
+
+
+
 sub recurseStructure {
 	my($self, $o, $name, $base) = @_;
 	my $skip_nulls = $self->{'skip_nulls'};
@@ -74,6 +84,13 @@ sub recurseStructure {
 		my $keysUsed;
 		while (my($key, $cargo) = each %$o) {
 			#next if $key eq 'labels' && $o->{'max_labels_exceeded'}; # bdqc-specific tweak
+			
+			#test whether $key is acceptable, shortcut if not
+			if ($self->excludeKey($key)) {
+				print "#skipping excluded key: $key\n" if $self->{'debug'}>6;
+				next;
+			}
+			
 			my $vkey = $self->vector_value($key);
 			my $value;
 			if (ref $cargo) {
