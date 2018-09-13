@@ -25,7 +25,7 @@ sub new {
 	$obj->{'skip_nulls'} = 1;
 	$obj->{'arrays_are_sets'} = 0;
 	$obj->{'statements'} = 0;
-	$obj->{'debug'} = 6;
+	$obj->{'debug'} = 0;
 	$obj->{'fp'} = {};
 	bless $obj, $package;
 	return $obj;
