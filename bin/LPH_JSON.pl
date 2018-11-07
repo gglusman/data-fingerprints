@@ -32,7 +32,7 @@ my $LPH = new LIBLPH;
 
 use JSON;
 my($scanfile, $idField, $L, $normalize, $debug) = @ARGV;
-die "Usage: $0 file_to_scan id_field L normalize\n" unless $scanfile && -e $scanfile;
+die "Usage: $0 file_to_scan id_field L [normalize] [debug]\n" unless $scanfile && -e $scanfile;
 $L ||= 50;
 $LPH->{'L'} = $L;
 $LPH->{'debug'} = $debug if $debug;
