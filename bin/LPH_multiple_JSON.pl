@@ -15,6 +15,7 @@ use strict;
 # The first parameter is the directory where the JSON objects are located.
 # The second parameter is the fingerprint size to be used.
 # The third parameter specifies whether fingerprints need to be normalized.
+# The fourth parameter specifies the level of verbosity for debugging purposes.
 #
 # The standard output consists of fingerprints of the JSON objects in the directory, one per line.
 # The first column is the identifier (filename).
@@ -29,10 +30,11 @@ use LIBLPH;
 my $LPH = new LIBLPH;
 
 use JSON;
-my($dir, $L, $normalize) = @ARGV;
-die "Usage: $0 dir_to_scan L normalize\n" unless $dir && -e $dir;
+my($dir, $L, $normalize, $debug) = @ARGV;
+die "Usage: $0 dir_to_scan L [normalize] [debug]\n" unless $dir && -e $dir;
 $L ||= 50;
 $LPH->{'L'} = $L;
+$LPH->{'debug'} = $debug if $debug;
 my(%cache, %cacheCount);
 my $decimals = 3;
 

@@ -16,6 +16,7 @@ use strict;
 # The second parameter is the field to be used as identifier.
 # The third parameter is the fingerprint size to be used.
 # The fourth parameter specifies whether fingerprints need to be normalized.
+# The fifth parameter specifies the level of verbosity for debugging purposes.
 #
 # The standard output consists of fingerprints of the JSON objects in the file, one per line.
 # The first column is the object identifier.
@@ -30,10 +31,11 @@ use LIBLPH;
 my $LPH = new LIBLPH;
 
 use JSON;
-my($scanfile, $idField, $L, $normalize) = @ARGV;
+my($scanfile, $idField, $L, $normalize, $debug) = @ARGV;
 die "Usage: $0 file_to_scan id_field L normalize\n" unless $scanfile && -e $scanfile;
 $L ||= 50;
 $LPH->{'L'} = $L;
+$LPH->{'debug'} = $debug if $debug;
 my(%cache, %cacheCount);
 my $decimals = 3;
 #$LPH->{'debug'} = 1;
