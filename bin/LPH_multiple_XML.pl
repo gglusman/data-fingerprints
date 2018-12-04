@@ -37,7 +37,8 @@ my(%cache, %cacheCount);
 my $decimals = 3;
 
 foreach my $scanfile (fulldirlist($dir)) {
-	my $content = XMLin("$dir/$scanfile", ForceArray => 1, KeyAttr => 1);
+	my $content = eval {XMLin("$dir/$scanfile", ForceArray => 0, KeyAttr => 1)};
+	next if $@; ## XML parsing failed; should probably say something
 	
 	$LPH->resetFingerprint();
 	$LPH->recurseStructure($content);
