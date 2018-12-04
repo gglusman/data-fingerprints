@@ -37,7 +37,7 @@ $LPH->{'L'} = $L;
 my(%cache, %cacheCount);
 my $decimals = 3;
 
-my $content = XMLin($scanfile, ForceArray => 1, KeyAttr => 1);
+my $content = XMLin($scanfile, ForceArray => 0, KeyAttr => 1);
 
 foreach my $entry (@$content) {
 	my $id = $entry->{$idField};
