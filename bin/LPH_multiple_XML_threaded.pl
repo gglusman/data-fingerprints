@@ -38,8 +38,8 @@ my $decimals = 3;
 $outbase ||= $dir;
 $threads ||= 4;
 
-#my @filelist = fulldirlist($dir);
-my @filelist = recursedirlist($dir);
+my @filelist = fulldirlist($dir);
+#my @filelist = recursedirlist($dir);
 my $n = scalar @filelist;
 print "found $n files\n";
 #foreach my $i (0..$n-1) {
@@ -101,7 +101,6 @@ sub recursedirlist {
 			my @subitems = recursedirlist("$dir/$item");
 			foreach my $subitem (@subitems) {
 				push @files, "$item/$subitem";
-				last;
 			}
 		} else {
 			push @files, $item;
