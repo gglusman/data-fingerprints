@@ -39,7 +39,7 @@ $outbase ||= $dir;
 $threads ||= 4;
 
 my @filelist = fulldirlist($dir);
-#my @filelist = recursedirlist($dir);
+my @filelist = recursedirlist($dir);
 my $n = scalar @filelist;
 print "found $n files\n";
 #foreach my $i (0..$n-1) {

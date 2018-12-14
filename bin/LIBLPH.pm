@@ -1,6 +1,6 @@
 package LIBLPH;
 use strict;
-my $version = '180913';
+my $version = '181214';
 ####
 #
 # This software library computes data fingerprints.
@@ -92,19 +92,17 @@ sub recurseStructure {
 			}
 			
 			my $vkey = $self->vector_value($key);
-			my $value;
+			#print join("\t", "key-vkey", $key, $vkey), "\n";
 			if (ref $cargo) {
-				$value = $self->recurseStructure($cargo, $key, $vkey);
+				$cargo = $self->recurseStructure($cargo, $key, $vkey);
 			} elsif (!$cargo && $skip_nulls) {
 				next;
-			} else {
-				$value = $self->vector_value($cargo);
 			}
-			$self->add_vector_values($base, $vkey, $value, "#hash_entry", $name, $key, $cargo);
+			$self->add_vector_values($base, $vkey, $self->vector_value($cargo), "#hash_entry", $name, $key, $cargo);
 			$keysUsed++;
 		}
 		$self->{'statements'} += $keysUsed;
-		return $self->vector_value($keysUsed);
+		return $keysUsed;
 	} elsif (ref $o eq 'ARRAY') {
 		return unless @$o;
 		if (1==scalar @$o) {
@@ -112,7 +110,7 @@ sub recurseStructure {
 			if (ref $o->[0]) {
 				return $self->recurseStructure($o->[0], $name, $base);
 			} else {
-				return $self->vector_value($o->[0]);
+				return $o->[0];
 			}
 		}
 		if ($self->{'arrays_are_sets'}) {
@@ -120,37 +118,33 @@ sub recurseStructure {
 			foreach my $key (0..$#$o) {
 				my $cargo = $o->[$key];
 				my $vkey = $self->vector_value(0); # all positions in array get the same key -> a set
-				my $value;
 				if (ref $cargo) {
-					$value = $self->recurseStructure($cargo, $key, $vkey);
+					$cargo = $self->recurseStructure($cargo, $key, $vkey);
 				} elsif (!$cargo && $skip_nulls) {
 					next;
-				} else {
-					$value = $self->vector_value($cargo);
 				}
-				$self->add_vector_values($base, $vkey, $value, "#set_entry", $name, $key, $cargo);
+				$self->add_vector_values($base, $vkey, $self->vector_value($cargo), "#set_entry", $name, $key, $cargo);
 				$keysUsed++;
 			}
 			$self->{'statements'} += $keysUsed;
-			return $self->vector_value($keysUsed);
+			return $keysUsed;
 		} else {
-			my @values;
 			foreach my $i (0..$#$o) {
-				$values[$i] = ref $o->[$i] ? $self->recurseStructure($o->[$i], $i, $self->vector_value($i)) : $self->vector_value($o->[$i]);
+				$o->[$i] = $self->recurseStructure($o->[$i], $i, $self->vector_value($i)) if ref $o->[$i];
 			}
 			# add link to first element in array
-			$self->add_vector_values($base, $self->vector_value(0), $values[0], "#array_start", $name, 0, $o->[0]);
+			$self->add_vector_values($base, $self->vector_value(0), $self->vector_value($o->[0]), "#array_start", $name, 0, $o->[0]);
 			# add links between subsequent pairs of elements in array
 			foreach my $i (1..$#$o) {
-				$self->add_vector_values($base, $values[$i-1], $values[$i], "#array_pair", $name, $o->[$i-1], $o->[$i]);
+				$self->add_vector_values($base, $self->vector_value($o->[$i-1]), $self->vector_value($o->[$i]), "#array_pair", $name, $o->[$i-1], $o->[$i]);
 			}
 			# add link from last element in array
-			$self->add_vector_values($base, $values[$#$o], $self->vector_value(scalar @$o), "#array_end", $name, $o->[$#$o], scalar @$o);
+			$self->add_vector_values($base, $self->vector_value($o->[$#$o]), $self->vector_value(scalar @$o), "#array_end", $name, $o->[$#$o], scalar @$o);
 			$self->{'statements'} += 1+scalar @$o;
-			return $self->vector_value(scalar @$o);
+			return scalar @$o;
 		}
 	} else {
-		return $self->vector_value($o);
+		return $o;
 	}
 }
 
@@ -159,7 +153,8 @@ sub add_vector_values {
 	my $Ls = $self->{'_L'};
 	my $fp = $self->{'fp'};
 	
-	print join("\t", "#adding vector values", @stuff), "\n" if $self->{'debug'}>2;
+	print join("\t", "#triple", @stuff), "\n" if $self->{'debug'};
+	#print join("\t", "#adding vector values", @stuff), "\n" if $self->{'debug'};
 	# adds the three vectors to the fingerprint, rotating v2 by 1 and v3 by 2, both to the left
 	### need to implement a more meaningful method
 	### this method yields identical fingerprints when swapping internal items in an ordered array,

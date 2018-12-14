@@ -39,7 +39,9 @@ $outbase ||= $dir;
 $threads ||= 4;
 
 my @filelist = fulldirlist($dir);
+#my @filelist = recursedirlist($dir);
 my $n = scalar @filelist;
+print "found $n files\n";
 
 foreach my $thread (0..$threads-1) {
 	if (fork()) {
@@ -94,4 +96,25 @@ sub fulldirlist {
 	closedir DIR;
 	return @files;
 }
+
+sub recursedirlist {
+	my($dir) = @_;
+	my(@files);
+	opendir (DIR, $dir);
+	my @items = grep /^[^.]/, readdir DIR;
+	closedir DIR;
+	foreach my $item (@items) {
+		if (-d "$dir/$item") {
+			my @subitems = recursedirlist("$dir/$item");
+			foreach my $subitem (@subitems) {
+				push @files, "$item/$subitem";
+			}
+		} else {
+			push @files, $item;
+		}
+	}
+	
+	return @files;
+}
+
 
