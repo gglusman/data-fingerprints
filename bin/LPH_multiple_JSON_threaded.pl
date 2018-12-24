@@ -53,13 +53,17 @@ foreach my $thread (0..$threads-1) {
 		open OUTF, ">$outbase.$thread";
 		for (my $i=$thread;$i<$n;$i+=$threads) {
 			my $scanfile = $filelist[$i];
+			my $id = $scanfile;
 			if ($scanfile =~ /\.gz$/) {
+				$id =~ s/\.gz$//;
 				open JF, "gunzip -c $dir/$scanfile |";
 			} elsif ($scanfile =~ /\.bz2$/) {
+				$id =~ s/\.bz2$//;
 				open JF, "bzcat $dir/$scanfile |";
 			} else {
 				open JF, "$dir/$scanfile";
 			}
+			$id =~ s/\.json$//;
 			my @jsonContent = <JF>;
 			close JF;
 			chomp(@jsonContent);
@@ -80,7 +84,7 @@ foreach my $thread (0..$threads-1) {
 			}
 			my @v;
 			push @v, @{$fp->{$_}} foreach sort {$a<=>$b} keys %$fp;
-			print OUTF join("\t", $scanfile, $LPH->{'statements'}, map {sprintf("%.${decimals}f", $_)} @v), "\n";
+			print OUTF join("\t", $id, $LPH->{'statements'}, map {sprintf("%.${decimals}f", $_)} @v), "\n";
 			if ($done && !($done % $cache_clear)) {
 				#print "clearing cache for thread $thread\n";
 				$LPH->clear_cache();

@@ -39,9 +39,12 @@ my(%cache, %cacheCount);
 my $decimals = 3;
 
 foreach my $scanfile (fulldirlist($dir)) {
+	my $id = $scanfile;
 	if ($scanfile =~ /\.gz$/) {
+		$id =~ s/\.gz$//;
 		open JF, "gunzip -c $dir/$scanfile |";
 	} elsif ($scanfile =~ /\.bz2$/) {
+		$id =~ s/\.bz2$//;
 		open JF, "bzcat $dir/$scanfile |";
 	} else {
 		open JF, "$dir/$scanfile";
@@ -52,6 +55,7 @@ foreach my $scanfile (fulldirlist($dir)) {
 	my $jsonString = join("", @jsonContent);
 	next unless $jsonString;
 	my $content = decode_json($jsonString);
+	$id =~ s/\.json$//;
 	
 	$LPH->resetFingerprint();
 	$LPH->recurseStructure($content);
