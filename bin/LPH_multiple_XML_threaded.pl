@@ -15,6 +15,9 @@ use strict;
 # The first parameter is the directory where the XML objects are located.
 # The second parameter is the fingerprint size to be used.
 # The third parameter specifies whether fingerprints need to be normalized.
+# The fourth parameter specifies where to put the output.
+# The fifth parameter specifies how many threads to use.
+# The sixth parameter specifies how many fingerprints to compute between cache clears. Adjust this to avoid running out of memory. More threads -> more frequent cache clears.
 #
 # The output consists of fingerprints of the XML objects in the directory, one per line, but split into files per thread - you'll need to combine them.
 # The first column is the identifier (filename).
@@ -29,14 +32,15 @@ use LIBLPH;
 my $LPH = new LIBLPH;
 
 use XML::Simple qw(:strict);
-my($dir, $L, $normalize, $outbase, $threads) = @ARGV;
-die "Usage: $0 dir_to_scan L normalize\n" unless $dir && -e $dir;
+my($dir, $L, $normalize, $outbase, $threads, $cache_clear) = @ARGV;
+die "Usage: $0 dir_to_scan L normalize output_base N_threads cache_clearing_frequency\n" unless $dir && -e $dir;
 $L ||= 50;
 $LPH->{'L'} = $L;
 my(%cache, %cacheCount);
 my $decimals = 3;
 $outbase ||= $dir;
 $threads ||= 4;
+$cache_clear ||= 500;
 
 my @filelist = fulldirlist($dir);
 my @filelist = recursedirlist($dir);
@@ -70,14 +74,14 @@ foreach my $thread (0..$threads-1) {
 			my @v;
 			push @v, @{$fp->{$_}} foreach sort {$a<=>$b} keys %$fp;
 			print OUTF join("\t", $scanfile, $LPH->{'statements'}, map {sprintf("%.${decimals}f", $_)} @v), "\n";
-			if ($done && !($done % 500)) {
-				print "clearing cache for thread $thread\n";
+			if ($done && !($done % $cache_clear)) {
+				#print "clearing cache for thread $thread\n";
 				$LPH->clear_cache();
 			}
 			$done++;
 		}
 		close OUTF;
-		print "finished thread $thread having done $done\n";
+		#print "finished thread $thread having done $done\n";
 		exit;
 	}
 }
