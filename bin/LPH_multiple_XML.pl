@@ -39,7 +39,9 @@ my $decimals = 3;
 foreach my $scanfile (fulldirlist($dir)) {
 	my $content = eval {XMLin("$dir/$scanfile", ForceArray => 0, KeyAttr => 1)};
 	next if $@; ## XML parsing failed; should probably say something
-	
+	my $id = $scanfile;
+	$id =~ s/\.gz$//;
+	$id =~ s/\.xml$//;
 	$LPH->resetFingerprint();
 	$LPH->recurseStructure($content);
 	next unless $LPH->{'statements'};
@@ -51,7 +53,7 @@ foreach my $scanfile (fulldirlist($dir)) {
 	}
 	my @v;
 	push @v, @{$fp->{$_}} foreach sort {$a<=>$b} keys %$fp;
-	print join("\t", $scanfile, $LPH->{'statements'}, map {sprintf("%.${decimals}f", $_)} @v), "\n";
+	print join("\t", $id, $LPH->{'statements'}, map {sprintf("%.${decimals}f", $_)} @v), "\n";
 }
 
 

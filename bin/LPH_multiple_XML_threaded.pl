@@ -60,6 +60,9 @@ foreach my $thread (0..$threads-1) {
 			my $scanfile = $filelist[$i];
 			my $content = eval {XMLin("$dir/$scanfile", ForceArray => 0, KeyAttr => 1)};
 			next if $@; ## XML parsing failed; should probably say something
+			my $id = $scanfile;
+			$id =~ s/\.gz$//;
+			$id =~ s/\.xml$//;
 			
 			$LPH->resetFingerprint();
 			$LPH->recurseStructure($content);
@@ -73,7 +76,7 @@ foreach my $thread (0..$threads-1) {
 			}
 			my @v;
 			push @v, @{$fp->{$_}} foreach sort {$a<=>$b} keys %$fp;
-			print OUTF join("\t", $scanfile, $LPH->{'statements'}, map {sprintf("%.${decimals}f", $_)} @v), "\n";
+			print OUTF join("\t", $id, $LPH->{'statements'}, map {sprintf("%.${decimals}f", $_)} @v), "\n";
 			if ($done && !($done % $cache_clear)) {
 				#print "clearing cache for thread $thread\n";
 				$LPH->clear_cache();
