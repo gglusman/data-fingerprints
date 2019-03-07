@@ -201,7 +201,7 @@ sub add_vector_values {
 		if ($min) { $_ -= $min foreach @tmp }
 		$total += $_ foreach @tmp;
 		@tmp = map {$_/$total} @tmp if $total;
-		$fp->{$L}[$_] += $tmp[$_] foreach (0..$L-1;
+		$fp->{$L}[$_] += $tmp[$_] foreach (0..$L-1);
 	}
 	
 	if ($self->{'debug'}>2) {
