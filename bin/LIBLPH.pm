@@ -1,6 +1,6 @@
 package LIBLPH;
 use strict;
-my $version = '181214';
+my $version = '190307';
 ####
 #
 # This software library computes data fingerprints.
