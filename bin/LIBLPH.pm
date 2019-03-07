@@ -148,7 +148,7 @@ sub recurseStructure {
 	}
 }
 
-sub add_vector_values {
+sub add_vector_values_average {
 	my($self, $v1, $v2, $v3, @stuff) = @_;
 	my $Ls = $self->{'_L'};
 	my $fp = $self->{'fp'};
@@ -164,6 +164,44 @@ sub add_vector_values {
 			my $v = ($v1->{$L}[$i] + $v2->{$L}[($i+1) % $L] + $v3->{$L}[($i+2) % $L])/3;
 			$fp->{$L}[$i] += $v;
 		}
+	}
+	
+	if ($self->{'debug'}>2) {
+		print join("\t", "#result:", map({sprintf("%.3f", $_)} @{$fp->{$Ls->[0]}})), "\n";
+	}
+	
+}
+
+sub add_vector_values {
+	my($self, $v1, $v2, $v3, @stuff) = @_;
+	my $Ls = $self->{'_L'};
+	my $fp = $self->{'fp'};
+	
+	print join("\t", "#triple", @stuff), "\n" if $self->{'debug'};
+	#print join("\t", "#adding vector values", @stuff), "\n" if $self->{'debug'};
+	# combines the three vectors in a triple, and adds the result to the fingerprint
+	# to distinguish the three components, one is kept as is, one is squared and one is transformed to its square root
+	# all three are incremented by one and multiplied, then one is subtracted from the result
+	# finally the resulting combined vector is rescaled
+	foreach my $L (@$Ls) {
+		my @tmp;
+		foreach my $i (0..$L-1) {
+			my $x = 1 + abs($v1->{$L}[$i]);
+			my $y = 1 + ($v2->{$L}[$i])**2;
+			my $z = 1 + sqrt(abs($v3->{$L}[$i]));
+			$tmp[$i] = $x*$y*$z - 1;
+		}
+		
+		#stretch the value and scale to a total of 1
+		my($min, $total);
+		foreach (@tmp) {
+			$min = $_ || 0 if $min>$_ || !defined $min;
+			last if $min==0;
+		}
+		if ($min) { $_ -= $min foreach @tmp }
+		$total += $_ foreach @tmp;
+		@tmp = map {$_/$total} @tmp if $total;
+		$fp->{$L}[$_] += $tmp[$i] foreach (0..$L-1;
 	}
 	
 	if ($self->{'debug'}>2) {
