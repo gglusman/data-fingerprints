@@ -22,6 +22,7 @@ sub new {
 	$obj->{'numeric_encoding'} = 'ME'; # ME, ML, smooth, simple [default if given null option]
 	$obj->{'string_encoding'} = 'decay';
 	$obj->{'string_encoding_decay'} = 0.1;
+	$obj->{'exponent_weight'} = 0.5;
 	$obj->{'skip_nulls'} = 1;
 	$obj->{'arrays_are_sets'} = 0;
 	$obj->{'statements'} = 0;
@@ -91,13 +92,15 @@ sub recurseStructure {
 				next;
 			}
 			
-			my $vkey = $self->vector_value($key);
+			my $vkey;
 			#print join("\t", "key-vkey", $key, $vkey), "\n";
 			if (ref $cargo) {
+				$vkey = $self->vector_value($key);
 				$cargo = $self->recurseStructure($cargo, $key, $vkey);
 			} elsif (!$cargo && $skip_nulls) {
 				next;
 			}
+			$vkey //= $self->vector_value($key);
 			$self->add_vector_values($base, $vkey, $self->vector_value($cargo), "#hash_entry", $name, $key, $cargo);
 			$keysUsed++;
 		}
@@ -180,16 +183,16 @@ sub add_vector_values {
 	print join("\t", "#triple", @stuff), "\n" if $self->{'debug'};
 	#print join("\t", "#adding vector values", @stuff), "\n" if $self->{'debug'};
 	# combines the three vectors in a triple, and adds the result to the fingerprint
-	# to distinguish the three components, one is kept as is, one is squared and one is transformed to its square root
-	# all three are incremented by one and multiplied, then one is subtracted from the result
-	# finally the resulting combined vector is rescaled
 	foreach my $L (@$Ls) {
 		my @tmp;
 		foreach my $i (0..$L-1) {
-			my $x = 1 + abs($v1->{$L}[$i]);
-			my $y = 1 + ($v2->{$L}[$i])**2;
-			my $z = 1 + sqrt(abs($v3->{$L}[$i]));
-			$tmp[$i] = $x*$y*$z - 1;
+			my $x = $v1->{$L}[$i];
+			my $y = $v2->{$L}[$i];
+			my $z = $v3->{$L}[$i];
+			my $xx = 1+abs($x * cos($x));
+			my $yy = 1+abs($y * cos(2*$y));
+			my $zz = 1+abs($z * cos(3*$z));
+			$tmp[$i] = ($xx*$yy*$zz)**(1/3) - 1;
 		}
 		
 		#stretch the value and scale to a total of 1
@@ -249,18 +252,19 @@ sub vector_value { #computes the value of the first argument in vector form
 			$_ = sprintf("%e", $o);
 			my($mantissa, $exponent) = /(\-?[\d\.]+)e([\+\-]\d+)/;
 			$mantissa /= 10;
-			
+			my $exp_w = $self->{'exponent_weight'};
+			my $man_w = 1-$exp_w;
 			foreach my $L (@$Ls) {
 				#encode the mantissa - a fraction, range (-1..1)
 				$mantissa *= $L;
 				if (my $over = abs($mantissa - int($mantissa))) {
-					$new->{$L}[$mantissa % $L] += 1-$over;
-					$new->{$L}[($mantissa+($mantissa>0 ? 1 : -1)) % $L] += $over;
+					$new->{$L}[$mantissa % $L] += $man_w*(1-$over);
+					$new->{$L}[($mantissa+($mantissa>0 ? 1 : -1)) % $L] += $man_w*$over;
 				} else {
-					$new->{$L}[$mantissa % $L]++;
+					$new->{$L}[$mantissa % $L] += $man_w;
 				}
 				#encode the exponent - an integer, which can be negative
-				$new->{$L}[$exponent % $L]++; ##this gives equal weight to the mantissa and the exponent
+				$new->{$L}[$exponent % $L] += $exp_w;
 			}
 		} elsif ($encoding eq 'ML') { # Mantissa/Log value
 			$_ = sprintf("%e", $o);
