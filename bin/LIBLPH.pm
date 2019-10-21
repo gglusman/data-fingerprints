@@ -1,6 +1,6 @@
 package LIBLPH;
 use strict;
-my $version = '190307';
+my $version = '190308';
 ####
 #
 # This software library computes data fingerprints.
@@ -116,7 +116,7 @@ sub recurseStructure {
 				return $o->[0];
 			}
 		}
-		if ($self->{'arrays_are_sets'}) {
+		if (1 || $self->{'arrays_are_sets'}) {
 			my $keysUsed;
 			foreach my $key (0..$#$o) {
 				my $cargo = $o->[$key];
@@ -183,15 +183,19 @@ sub add_vector_values {
 	print join("\t", "#triple", @stuff), "\n" if $self->{'debug'};
 	#print join("\t", "#adding vector values", @stuff), "\n" if $self->{'debug'};
 	# combines the three vectors in a triple, and adds the result to the fingerprint
+	my($x, $y, $z, $xx, $yy, $zz, $v1l, $v2l, $v3l);
 	foreach my $L (@$Ls) {
 		my @tmp;
+		$v1l = $v1->{$L};
+		$v2l = $v2->{$L};
+		$v3l = $v3->{$L};
 		foreach my $i (0..$L-1) {
-			my $x = $v1->{$L}[$i];
-			my $y = $v2->{$L}[$i];
-			my $z = $v3->{$L}[$i];
-			my $xx = 1+abs($x * cos($x));
-			my $yy = 1+abs($y * cos(2*$y));
-			my $zz = 1+abs($z * cos(3*$z));
+			$x = $v1l->[$i];
+			$y = $v2l->[$i];
+			$z = $v3l->[$i];
+			$xx = 1+abs($x * cos(  $x));
+			$yy = 1+abs($y * cos(2*$y));
+			$zz = 1+abs($z * cos(3*$z));
 			$tmp[$i] = ($xx*$yy*$zz)**(1/3) - 1;
 		}
 		
@@ -244,7 +248,9 @@ sub vector_value { #computes the value of the first argument in vector form
 
 	print "#computing vector_value($o)\n" if $self->{'debug'}>2;
 	
+	my $data_type;
 	if ($self->isnumeric($o) && $o !~ /^nan$/i) {
+		$data_type = 'number';
 		my $encoding = $self->{'numeric_encoding'};
 		if (!$o) {
 			#just keep the null value
@@ -348,7 +354,7 @@ sub vector_value { #computes the value of the first argument in vector form
 
 	print join("\t", "#final.:", map({sprintf("%.3f", $_)} @{$new->{$Ls->[0]}}), "sum:", $self->sum($new->{$Ls->[0]})), "\n" if $self->{'debug'}>2;
 
-	$cache->{$o} = $new if $self->{'usecache'};
+	$cache->{$o} = $new if $self->{'usecache'} && $data_type ne 'number';
 	return $new;
 }
 
