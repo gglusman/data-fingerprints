@@ -36,9 +36,8 @@ die "Usage: $0 file_to_scan id_field L [normalize] [debug]\n" unless $scanfile &
 $L ||= 50;
 $LPH->{'L'} = $L;
 $LPH->{'debug'} = $debug if $debug;
-my(%cache, %cacheCount);
+#my(%cache, %cacheCount);
 my $decimals = 3;
-#$LPH->{'debug'} = 1;
 
 if ($scanfile =~ /\.gz$/) {
 	open JF, "gunzip -c $scanfile |";
