@@ -1,6 +1,6 @@
 package LIBLPH;
 use strict;
-my $version = '190308';
+my $version = '191022';
 ####
 #
 # This software library computes data fingerprints.
@@ -220,6 +220,7 @@ sub add_vector_values {
 sub isnumeric ($) {
 	no warnings;
 	my $v = $_[1];
+	$v =~ s/\.0+$//;
 	if (substr($v,0,1) eq '.') {
 		return "0$v" eq $v+0;
 	} elsif ($v =~ /^([\-\+])\.(.+)/) {
