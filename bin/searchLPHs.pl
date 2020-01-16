@@ -99,6 +99,7 @@ my $pairs;
 my $lines;
 my @hist;
 while (<FPC>) {
+	#print;
 	chomp;
 	my($q, $t, $c) = split /\t/;
 	$lines++;
@@ -106,7 +107,7 @@ while (<FPC>) {
 	next if defined $cutoff && $c<$cutoff;
 	$c{join("\t", $qnames->[$q-1], $tnames->[$t-1])} = $c;
 	$pairs++;
-	unless ($pairs % $maxSave) {
+	unless (!$maxSave || ($pairs % $maxSave)) {
 		my @sorted = sort {$c{$b}<=>$c{$a}} keys %c;
 		$cutoff = $c{$sorted[$maxSave]};
 		for (my $i=$maxSave;$i<scalar @sorted;$i++) {
@@ -125,6 +126,7 @@ if ($histogram_outfile) {
 }
 
 my @sorted = sort {$c{$b}<=>$c{$a}} keys %c;
+$maxSave ||= scalar @sorted;
 for (my $i=0;$i<$maxSave && $i<=$#sorted;$i++) {
 	print join("\t", $sorted[$i], $c{$sorted[$i]}), "\n";
 }
