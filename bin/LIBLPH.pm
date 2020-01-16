@@ -1,6 +1,6 @@
 package LIBLPH;
 use strict;
-my $version = '191022';
+my $version = '200116';
 ####
 #
 # This software library computes data fingerprints.
@@ -116,7 +116,7 @@ sub recurseStructure {
 				return $o->[0];
 			}
 		}
-		if (1 || $self->{'arrays_are_sets'}) {
+		if ($self->{'arrays_are_sets'}) {
 			my $keysUsed;
 			foreach my $key (0..$#$o) {
 				my $cargo = $o->[$key];
@@ -157,11 +157,10 @@ sub add_vector_values_average {
 	my $fp = $self->{'fp'};
 	
 	print join("\t", "#triple", @stuff), "\n" if $self->{'debug'};
-	#print join("\t", "#adding vector values", @stuff), "\n" if $self->{'debug'};
 	# adds the three vectors to the fingerprint, rotating v2 by 1 and v3 by 2, both to the left
-	### need to implement a more meaningful method
 	### this method yields identical fingerprints when swapping internal items in an ordered array,
 	### e.g., a,b,c,d and a,c,b,d end up being identical
+	### replaced with value+cos method
 	foreach my $L (@$Ls) {
 		foreach my $i (0..$L-1) {
 			my $v = ($v1->{$L}[$i] + $v2->{$L}[($i+1) % $L] + $v3->{$L}[($i+2) % $L])/3;
@@ -181,7 +180,6 @@ sub add_vector_values {
 	my $fp = $self->{'fp'};
 	
 	print join("\t", "#triple", @stuff), "\n" if $self->{'debug'};
-	#print join("\t", "#adding vector values", @stuff), "\n" if $self->{'debug'};
 	# combines the three vectors in a triple, and adds the result to the fingerprint
 	my($x, $y, $z, $xx, $yy, $zz, $v1l, $v2l, $v3l);
 	foreach my $L (@$Ls) {
