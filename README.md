@@ -32,14 +32,20 @@ Preprint: https://www.biorxiv.org/content/early/2018/04/02/293183
 	```
 
 3. Serialize fingerprints into a database.
+	```
 	`bin/serializeLPH.pl` _collection L columnsToIgnore normalize @listOfFingerprints_
 	`bin/serializeLPH.pl` _collection L columnsToIgnore normalize *.outn.gz_
+	```
 
 4. Compare two databases.
+	```
 	`bin/searchLPHs.pl` _collection anotherCollection_
+	```
 
 5. Perform all-against-all comparisons in one database.
+	```
 	`bin/searchLPHs.pl` _collection_
+	```
 
 This project is conceptually related to (but distinct from) the Genome Fingerprints: https://github.com/gglusman/genome-fingerprints
 
