@@ -1,0 +1,78 @@
+{
+"Diagnosis":  {
+	"DiagnosisDetail":  {
+		"record_create_date_shift": "2016-01-19",
+		"dx_name": "Muscle weakness (generalized)",
+		"icd9_list": [{"icd9_cd":"728.87"}],
+		"icd10_list": [{"icd10_cd":"M62.81", "icdxx_cd":"1234"}],
+		"final_dx_present_on_admission": "Yes"
+		},
+	"EDWKey":  {
+		"pat_id_dwkey_shift": "0xB51A5AA26CA4FDF31A80D75F052341BA50775E20F321987995EBA942E178C8BA",
+		"line": "3",
+		"diagnosis_dwkey_shift": "0x365F068121085173ECA7687F5F00ACAFECFBEACCFCA734A4538840D25702A9F8",
+		"managing_organization": "ORCA"
+	},
+	"EDWTimestamp":  {
+		"extract_date": "2018-07-12 07:27:46-07:00"
+	}
+},
+"test":  ["test1", "test2", "test3"]
+},
+{
+    "MedicationOrder":{
+        "MedOrderDetail":{
+            "medication_id_dwkey": "333",
+            "description": "SODIUM CHLORIDE 0.9 % IV SOLN",
+            "medication_route_cd": "Intravenous",
+            "quantity": "",
+            "min_discrete_dose": "",
+            "max_discrete_dose": "",
+            "dose_unit": "",
+            "frequency": "CONTINUOUS",
+            "mixed_meds": [],
+            "mixed_meds2": ["one", "two", "three"],
+            "sig": "",
+            "refills": "",
+            "refills_remaining": "0",
+            "order_class_dsc": "Normal",
+            "order_status_dsc": "Discontinued",
+            "ordering_mode_dsc": "Inpatient",
+            "order_placed_instant_time_shift": "2016-12-13",
+            "order_start_time_shift": "2016-07-13",
+            "order_end_time_shift": "2016-07-13",
+            "discon_time_shift": "2016-07-13",
+            "medication_discontinue_reason_dsc": "",
+            "authrzing_prov_id_dwkey": "6860"
+        },
+        "EDWKey":{
+            "pat_id_dwkey_shift": "0x5675FED5675FED55675FED55675FED55675FED55675FED5F",
+            "pat_enc_csn_id_dwkey_shift": "0x012ABC012ABC012ABC012ABC012ABC012ABC012ABC012ABC",
+            "managing_organization": "AKWY",
+            "order_med_id_dwkey_shift": "7879_68798"
+        },
+        "EDWTimestamp":{
+            "extract_date": "2016-07-13 17:24:20-07:00"
+        }
+    }
+},
+{                                                                                                               
+    "Patient": {
+        "PatientDetail": {
+            "birth_date_shift": "1942-06-03",
+            "death_ind": "Alive",
+            "death_date_shift": "1900-06-09",
+            "patient_sex": "Female",
+            "patient_race": "White or Caucasian",
+            "patient_ethnicity": "Not Hispanic or Latino",
+            "primary_oncologist_prov_id_dwkey": "1204_122129491"
+        },  
+        "EDWKey": {
+            "pat_id_dwkey_shift": "0x0CC4FA1EE3F41527BEB8208705FDBA1A1D4962EBC20B71BD3A17D73FF6134E0B",
+            "managing_organization": "ORCA"
+        },  
+        "EDWTimestamp": {
+            "extract_date": "2018-07-12 07:17:16-07:00"
+        }   
+    }   
+}
