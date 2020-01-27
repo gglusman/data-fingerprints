@@ -1,0 +1,15 @@
+0	"url"	"http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName"
+0	"valueString"	"Carolee931 Lubowitz132"
+1	"url"	"http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex"
+1	"valueCode"	"M"
+2	"url"	"http://hl7.org/fhir/StructureDefinition/patient-interpreterRequired"
+2	"valueBoolean"	False
+3	"url"	"http://standardhealthrecord.org/fhir/StructureDefinition/shr-demographics-SocialSecurityNumber-extension"
+3	"valueString"	"999-62-5092"
+"extension"	0	2
+"extension"	2	2
+"extension"	2	2
+"extension"	2	2
+"extension"	2	4
+"entry"	"extension"	4
+"root"	"entry"	1

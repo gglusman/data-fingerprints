@@ -1,0 +1,21 @@
+[
+{
+    "name": {
+        "first": "John",
+        "last": "Smith"
+    },
+    "children": [
+        "Adam",
+        "Beth",
+        "Chloe"
+    ],
+    "family": {
+        "son": {
+            "name": {
+                "first": "John",
+                "last": "Smith"
+            }
+        }
+    }
+}
+]

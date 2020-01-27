@@ -1,0 +1,8 @@
+"name"	"first"	"John"
+"name"	"last"	"Smith"
+"root"	"name"	2
+"children"	0	"Adam"
+"children"	"Adam"	"Beth"
+"children"	"Beth"	"Chloe"
+"children"	"Chloe"	3
+"root"	"children"	3
