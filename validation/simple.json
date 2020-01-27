@@ -1,0 +1,29 @@
+{
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:71d8dc04-4681-4a30-9cac-9566abed446b",
+      "resource": {
+        "id": "71d8dc04-4681-4a30-9cac-9566abed446b",
+        "meta": {
+          "profile": [
+            "http://standardhealthrecord.org/fhir/StructureDefinition/shr-actor-Organization"
+          ]
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/organization-type",
+                "code": "prov",
+                "display": "Healthcare Provider"
+              }
+            ],
+            "text": "Healthcare Provider"
+          }
+        ],
+        "name": "HOLY FAMILY HOSP AMBULATORY SRVS",
+        "resourceType": "Organization"
+      }
+    }
+	]
+}

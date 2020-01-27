@@ -1,0 +1,14 @@
+"PatientDetail"	"birth_date_shift"	"1942-06-03"
+"PatientDetail"	"death_ind"	"Alive"
+"PatientDetail"	"death_date_shift"	"1900-06-09"
+"PatientDetail"	"patient_sex"	"Female"
+"PatientDetail"	"patient_race"	"White or Caucasian"
+"PatientDetail"	"patient_ethnicity"	"Not Hispanic or Latino"
+"PatientDetail"	"primary_oncologist_prov_id_dwkey"	"1204_122129491"
+"Patient"	"PatientDetail"	7
+"EDWKey"	"pat_id_dwkey_shift"	"0x0CC4FA1EE3F41527BEB8208705FDBA1A1D4962EBC20B71BD3A17D73FF6134E0B"
+"EDWKey"	"managing_organization"	"ORCA"
+"Patient"	"EDWKey"	2
+"EDWTimestamp"	"extract_date"	"2018-07-12 07:17:16-07:00"
+"Patient"	"EDWTimestamp"	1
+"root"	"Patient"	3
