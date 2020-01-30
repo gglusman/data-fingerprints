@@ -1,6 +1,6 @@
 name: Tests
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -17,10 +17,10 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         docker-compose exec -T datafingerprint flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Install test requirements
-      run: docker-compose exec -T datafingerprint pip install -r datafingerprint/tests/requirements.txt
+      run: docker-compose exec -T datafingerprint pip install -r tests/requirements.txt
     - name: Test with behave
-      run: docker-compose exec -T datafingerprint behave datafingerprint/tests/features
+      run: docker-compose exec -T datafingerprint behave tests/features
     - name: Test with pytest
-      run: docker-compose exec -T datafingerprint python -m pytest datafingerprint/tests/unit
+      run: docker-compose exec -T datafingerprint python -m pytest tests/unit
     - name: Check logs
       run: docker-compose logs datafingerprint
