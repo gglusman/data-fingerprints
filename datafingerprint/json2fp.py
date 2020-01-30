@@ -28,7 +28,9 @@ class DataFingerprint(object):
         self.L = kwargs['length'] if 'length' in kwargs and kwargs['length'] is not None else 13
         self.norm = kwargs['norm'] if 'norm' in kwargs and kwargs['norm'] is not None else 0
         self.debug = kwargs['debug'] if 'debug' in kwargs and kwargs['debug'] is not None else 1
-        self.tripler = kwargs['tripler'] if 'tripler' in kwargs and kwargs['tripler'] is not None else 0
+        self.tripler = False
+        if 'tripler' in kwargs and kwargs['tripler'] is not None:
+            self.tripler = True
         self.file_paths = kwargs['file_paths'] if 'file_paths' in kwargs and kwargs['file_paths'] is not None else None
         self.root = 'root'
         self.numeric_encoding = 'ME'    # ME, ML, smooth, simple [default]
@@ -440,17 +442,17 @@ class DataFingerprint(object):
     help="The file path to a JSON file, multiple JSON files or directory of JSON files to process and create a fingerprint")
 @click.option('--debug', default=1, type=click.IntRange(0, 10, clamp=True),
     help="Level of debugging statements to output")
-@click.option('--triples/--no-triples', default=False,
+@click.option('--tripler/--no-tripler', default=False,
     help="Output a name/key/cargo tab delimited list of entries in json file(s)")
 @click.option('--normalize/-no-normalize', default=False, help="Normalize fingerprint")
 @click.option('--fp-length', default=13,
     help="The length of the fingerprint to generate.")
-def main(file_path, debug, triples, normalize, fp_length):
+def main(file_path, debug, tripler, normalize, fp_length):
     params = {
         'L': fp_length,
         'norm': normalize,
         'debug': debug,
-        'tripler': triples,
+        'tripler': tripler,
         'file_paths': file_path,  # a tuple of one or more files or directories
     }
 

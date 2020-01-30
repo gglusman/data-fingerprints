@@ -26,3 +26,16 @@ Feature: Fingerprint Algorithm
       And the DataFingerprint is processed
       Then a valid fingerprint is generated
 
+    Scenario: User resets
+      Given a valid JSON file
+      When a DataFingerprint is constructed
+      And the DataFingerprint is processed
+      And a DataFingerprint is reset
+      Then dfp contains no fingerprint
+
+    Scenario: User resets debug fingerprint
+      Given a valid JSON file
+      When a debug DataFingerprint is constructed
+      And the DataFingerprint is processed
+      And a DataFingerprint is reset
+      Then dfp contains no fingerprint
