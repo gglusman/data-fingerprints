@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# json2fp.py
+# datafingerprint.py
 # read json file and generate data fingerprint vectors (for length L)
 # matching Gustavo's version 181214
 #
@@ -431,9 +431,11 @@ class DataFingerprint(object):
                     if self.norm:  # record normalized data fingerprint
                         fp_string = '\t'.join(str(round(i, self.decimal)) for i in self.normalize())
                         print(patient_id + '\t' + str(self.statements) + '\t' + fp_string)
+                        return fp_string
                     else:  # record original data fingerprint
                         fp_string = '\t'.join(str(round(i, self.decimal)) for i in self.fp)
                         print(patient_id + '\t' + str(self.statements) + '\t' + fp_string)
+                        return fp_string
 
 # -------------------------------------------------------------------------
 # main

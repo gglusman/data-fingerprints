@@ -3,7 +3,7 @@ sys.path.append('../../')
 
 
 from behave import given, when, then, capture
-from datafingerprint.json2fp import DataFingerprint
+from datafingerprint.datafingerprint import DataFingerprint
 
 @when('a DataFingerprint is constructed')
 def construct_datafingerprint(context):

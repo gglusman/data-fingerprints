@@ -24,7 +24,6 @@ All of the files that begin with test_ are Pytest tests.
 Run the Pytest tests from the /app directory with:
 python -m pytest datafingerprint/tests/unit
 
-
 # Coverage
 
 To generate coverage, you must exec into the container and install the coverage plugin:
@@ -33,7 +32,7 @@ pip install coverage
 
 Then run the following commands:
 
-COVERAGE_FILE=.coverage_behave coverage run --source='datafingerprint' -m behave
+COVERAGE_FILE=.coverage.behave coverage run --source='datafingerprint' -m behave tests/features
 COVERAGE_FILE=.coverage.pytest coverage run --source='datafingerprint' -m pytest
 coverage combine
 coverage report -im

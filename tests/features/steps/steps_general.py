@@ -2,7 +2,7 @@ import sys
 sys.path.append('../../')
 
 from behave import given, when, then
-from datafingerprint.json2fp import DataFingerprint
+from datafingerprint.datafingerprint import DataFingerprint
 
 @given('there are no command line parameters')
 def no_command_line_parameters(context):
