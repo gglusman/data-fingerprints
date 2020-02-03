@@ -1,5 +1,5 @@
 """
-This file contains the unit tests for the datafingerprint/json2fp.py Datafingerprint class functions
+This file contains the unit tests for the datafingerprint/datafingerprint.py Datafingerprint class functions
 The DataFingerprint class is a collection of methods that can be used to create a
 data fingerprint
 """
@@ -8,7 +8,7 @@ import numpy
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 import pytest
 
-from datafingerprint.json2fp import DataFingerprint
+from datafingerprint.datafingerprint import DataFingerprint
 
 
 class TestDataFingeprint:
