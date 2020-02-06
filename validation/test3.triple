@@ -1,0 +1,5 @@
+"mixed_meds2"	0	"one"
+"mixed_meds2"	"one"	"two"
+"mixed_meds2"	"two"	"three"
+"mixed_meds2"	"three"	3
+"root"	"mixed_meds2"	3
