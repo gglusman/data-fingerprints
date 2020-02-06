@@ -33,6 +33,8 @@ my $version = '180110';
 my($outbase, $L, $columnsToIgnore, $normalize, @files) = @ARGV;
 die "The second parameter must be a number.\n" unless $L+1-1;
 
+$outbase =~ s/\.(id|fp)$//;
+
 my %done;
 if (-e "$outbase.id") {
 	open OUTI, "$outbase.id";

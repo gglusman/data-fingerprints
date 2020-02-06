@@ -50,6 +50,9 @@ if ($cutoff>1) {
 	$cutoff = -1;
 }
 
+$query  = $_ if $_ = readlink($query);
+$target = $_ if $_ = readlink($target);
+
 my($qnames, $tnames, $L);
 
 if (!$target) {
@@ -65,7 +68,7 @@ if (!$target) {
 
 
 
-if ($query =~ /(.+)\.fp/) {
+if ($query =~ /(.+)\.fp$/) {
 	$qnames = readIds("$1.id");
 } elsif (-e "$query.id") {
 	$qnames = readIds("$query.id");
