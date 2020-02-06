@@ -1,0 +1,15 @@
+version: "2.1"
+services:
+  datafingerprint:
+      build: "."
+      image: "gglusman/data-fingerprint"
+      entrypoint: ['/bin/bash']
+      tty: true
+      stdin_open: true
+      environment:
+        PYTHONUNBUFFERED: 1
+        COMPOSE_INTERACTIVE_NO_CLI: 1
+      ports:
+        - "80:80"
+        - "443:443"
+        - "8080:8080"
