@@ -16,11 +16,17 @@ def _process_params(params):
     if param == val:
       pl.append(param)
     else:
-      pl.extend(param, params[params])
+      pl.extend(['--{}'.format(param), params[param]])
 
   return pl
 
 @given('the parameter "{input_param}" is provided with "{value}"')
+def set_parameter(context, input_param, value):
+  if 'params' not in context:
+    context.params = dict()
+  context.params[input_param] = value
+
+@given('the numerical parameter "{input_param}" is provided with "{value:d}"')
 def set_parameter(context, input_param, value):
   if 'params' not in context:
     context.params = dict()
@@ -64,8 +70,33 @@ def help_statement(context):
   assert '--input' in result.output
   assert '--file_path' in result.output
   assert '--debug' in result.output
-  assert '--triples' in result.output
+  assert '--tripler' in result.output
   assert '--normalize' in result.output
   assert '--fp-length' in result.output
   assert '--help' in result.output
 
+@then('the datafingerprint has that numerical "{input_param}" of "{value:d}"')
+def test_parameter(context, input_param, value):
+  dfp = context.dfp
+  dfp_val = getattr(dfp, input_param)
+  print(dfp_val)
+  assert dfp_val == value
+
+
+@then('the datafingerprint has {flag} attribute "{attr_val}"')
+def test_flag(context, flag, attr_val):
+  runner = CliRunner()
+  params = context.params
+  print('params', params)
+  params['input'] = 'validation/test.json'
+  pl = _process_params(params)
+  print(pl)
+  result = runner.invoke(main, pl)
+  print(result)
+  assert result.exit_code == 0
+  dfp = context.dfp
+  print(flag)
+  print(dfp.__dict__)
+  if hasattr(dfp, flag):
+    print("dfp_val is ", dfp.flag)
+    assert dfp.flag == attr_val
