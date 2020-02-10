@@ -76,8 +76,8 @@ class DataFingerprint(object):
         if isinstance(n, int):
             return True
         if isinstance(n, str):
-            from re import match
-            return bool(match(r'[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?', str(n)))
+            from re import fullmatch
+            return bool(fullmatch(r'[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?', str(n)))
         return False
 
     # -------------------------------------------------------------------------
@@ -103,6 +103,8 @@ class DataFingerprint(object):
         if self.debug > 2:
             print("\n#computing vector_value:\t%s" % str(o))
         new = np.zeros(length)
+        if not o:
+            return new
 
         # for NUMBERS encoding
         if self.isnumeric(o):
