@@ -4,7 +4,7 @@ sys.path.append('../../')
 
 from behave import given, when, then
 from click.testing import CliRunner
-from datafingerprint.json2fp import main, DataFingerprint
+from datafingerprint.datafingerprint import main, DataFingerprint
 
 
 # turn the params dict into a list of params

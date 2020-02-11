@@ -1,7 +1,7 @@
 from click.testing import CliRunner
-from datafingerprint.json2fp import main
+from datafingerprint.datafingerprint import main
 """
-This file contains the unit tests for the datafingerprint/json2fp.py command line interface
+This file contains the unit tests for the datafingerprint/datafingerprint.py command line interface
 """
 
 def test_main():
