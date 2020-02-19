@@ -3,12 +3,27 @@ sys.path.append('../../')
 
 
 from behave import given, when, then, capture
-from datafingerprint.json2fp import DataFingerprint
+from datafingerprint.datafingerprint import DataFingerprint
 
 @when('a DataFingerprint is constructed')
 def construct_datafingerprint(context):
+  print("construct params {}".format(context.params))
   dfp = DataFingerprint(**context.params)
   context.dfp = dfp
+
+@when('a debug DataFingerprint is constructed')
+def construct_datafingerprint(context):
+  context.params['debug'] = 100
+  dfp = DataFingerprint(**context.params)
+  context.dfp = dfp
+
+@when('a DataFingerprint is reset')
+def reset_datafingerprint(context):
+  try:
+    context.dfp.reset()
+  except Exception as e:
+    print("Exception in reset_datafingerprint {}".format(e))
+
 
 @when('the DataFingerprint is processed')
 def process_datafingerprint(context):
@@ -30,6 +45,14 @@ def check_error_message(context):
   """
   assert context.expected_error_message in context.stderr_capture.getvalue()
 
+@then('dfp contains no fingerprint')
+def no_fingerprint(context):
+  from numpy import count_nonzero
+  dfp = context.dfp
+  assert len(dfp.fp) == dfp.L
+  assert count_nonzero(dfp.fp) == 0
+
+
 @then('a valid fingerprint is generated')
 def generate_valid_fingerprint(context):
   """
@@ -42,10 +65,6 @@ def generate_valid_fingerprint(context):
   Compares the generated fingerprint against the fixture fingerprint
     in the output_file
   """
-  # Following TODO also needed by usage_statement
-  # TODO: Refactor DataFingerprint to accept a list of files on initialization
-  # TODO: Refactor DataFingerprint to have a process method
-
   # TODO: Test that process method with a valid_input file returns the
   #  results in the output_file
   pass
