@@ -1,6 +1,8 @@
 package LIBLPH;
 use strict;
-my $version = '200116';
+my $version = '200218';
+use Scalar::Util qw(looks_like_number);
+
 ####
 #
 # This software library computes data fingerprints.
@@ -215,23 +217,6 @@ sub add_vector_values {
 	
 }
 
-sub isnumeric ($) {
-	no warnings;
-	my $v = $_[1];
-	$v =~ s/0+$// if $v =~ /\.\d*?0+/;
-	$v =~ s/\.$//;
-	if (substr($v,0,1) eq '.') {
-		return "0$v" eq $v+0;
-	} elsif ($v =~ /^([\-\+])\.(.+)/) {
-		return "${1}0.$2" eq $v+0;
-	} else {
-		return $v eq $v+0;
-	}
-	
-	# simplistic version, which fails for representations like .2, -.5:
-	#return $_[1] eq ($_[1]+0);
-}
-
 sub vector_value { #computes the value of the first argument in vector form
 	my($self, $o) = @_;
 	my $cache = $self->{'cache'};
@@ -249,7 +234,7 @@ sub vector_value { #computes the value of the first argument in vector form
 	print "#computing vector_value($o)\n" if $self->{'debug'}>2;
 	
 	my $data_type;
-	if ($self->isnumeric($o) && $o !~ /^nan$/i) {
+	if (looks_like_number($o) && $o !~ /^nan$/i) {
 		$data_type = 'number';
 		my $encoding = $self->{'numeric_encoding'};
 		if (!$o) {
