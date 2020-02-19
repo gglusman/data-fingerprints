@@ -1,5 +1,5 @@
 """
-This file contains the unit tests for the datafingerprint/json2fp.py Datafingerprint class functions
+This file contains the unit tests for the datafingerprint/datafingerprint.py Datafingerprint class functions
 The DataFingerprint class is a collection of methods that can be used to create a
 data fingerprint
 """
@@ -8,7 +8,7 @@ import numpy
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 import pytest
 
-from datafingerprint.json2fp import DataFingerprint
+from datafingerprint.datafingerprint import DataFingerprint
 
 
 class TestDataFingeprint:
@@ -48,7 +48,8 @@ class TestDataFingeprint:
       (3.1515, True),
       (0, True),
       (42, True),
-      (0.000009, True)
+      (0.000009, True),
+      ("71d8dc04-4681-4a30-9cac-9566abed446b", False)
     ]
   )
   def test_isnumeric(self, test_input, expected):
@@ -71,6 +72,13 @@ class TestDataFingeprint:
     print(res_m, res_e)
     assert res_e == expected_exponent
     assert res_m == expected_mantissa
+
+  def test_vector_value_empty(self):
+    """ Turn characters into vectors of numbers """
+    """ decay is the default encoding """
+    res = self.dfp.vector_value("")
+    expected = [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]
+    assert_array_equal(res, expected)
 
   def test_vector_value_string_decay_single(self):
     """ Turn characters into vectors of numbers """

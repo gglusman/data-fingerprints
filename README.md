@@ -1,7 +1,7 @@
 # data-fingerprints
-Software for creating and comparing data fingerprints: locality-sensitive hashing of semi-structured data in JSON or XML format. 
-More information and datasets: http://db.systemsbiology.net/gestalt/data_fingerprints/ 
-Preprint: https://www.biorxiv.org/content/early/2018/04/02/293183 
+Software for creating and comparing data fingerprints: locality-sensitive hashing of semi-structured data in JSON or XML format.
+More information and datasets: http://db.systemsbiology.net/gestalt/data_fingerprints/
+Preprint: https://www.biorxiv.org/content/early/2018/04/02/293183
 
 1. Create fingerprints. L is the desired fingerprint length.
 	```
@@ -17,7 +17,7 @@ Preprint: https://www.biorxiv.org/content/early/2018/04/02/293183
 	bin/LPH_linewise_JSON.pl file idField L [normalize] > collection
 	```
 
-2. Visualize. Example R code, where L is your fingerprint length: 
+2. Visualize. Example R code, where L is your fingerprint length:
 	```
 	data <- read.table("collection", header=FALSE)
 	M <- as.matrix(data[,2 + 1:L])
@@ -61,15 +61,15 @@ The Perl version is under active development and may contain newer features than
 
 The Dockerfile builds the resources for the python version by default.
 
-To run in docker first start the container with:
+To run in docker first build and start the container with:
+
 	docker-compose build
-	docker-compose up
+
+	docker-compose up -d
 
 To connect to the container and use data-fingerprint code:
-	docker-compose exec datafingerprint bash
 
-If you want to run the perl version, start the container and connect as above, then install perl:
-  apk add perl perl-json
+	docker-compose exec datafingerprint bash
 
 
 

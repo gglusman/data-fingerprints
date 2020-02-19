@@ -158,6 +158,7 @@ sub normalize {
 	my($fp) = @_;
 	
 	my($avg, $std) = avgstd($fp);
+	$std ||= 1;
 	foreach (@$fp) {
 		$_ = ($_-$avg)/$std;
 	}
