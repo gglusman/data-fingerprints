@@ -12,6 +12,8 @@ use strict;
 #
 ####
 #
+# This script expects as input a file representing a JSON array; this JSON array includes a collection of entities to be fingerprinted, and each entity (a JSON object) must have a key/value pair representing the identifier for that entity.
+#
 # The first parameter is the file with the JSON objects to be studied.
 # The second parameter is the field to be used as identifier.
 # The third parameter is the fingerprint size to be used.

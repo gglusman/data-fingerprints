@@ -12,6 +12,8 @@ use strict;
 #
 ####
 #
+# This script expects as input a directory with one or more files, each file representing a JSON object including a single entity to be fingerprinted. The file name is used as the identifier for that entity.
+#
 # The first parameter is the directory where the JSON objects are located.
 # The second parameter is the fingerprint size to be used.
 # The third parameter specifies whether fingerprints need to be normalized.
