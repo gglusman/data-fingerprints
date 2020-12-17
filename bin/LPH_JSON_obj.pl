@@ -12,13 +12,12 @@ use strict;
 #
 ####
 #
-# This script expects as input a file representing a JSON array; this JSON array includes a collection of entities to be fingerprinted, and each entity (a JSON object) must have a key/value pair representing the identifier for that entity.
+# This script expects as input a file representing a JSON object; this JSON object includes a collection of entities to be fingerprinted, such that the key is used as identifier, and the value is what is fingerprinted.
 #
 # The first parameter is the file with the JSON objects to be studied.
-# The second parameter is the field to be used as identifier.
-# The third parameter is the fingerprint size to be used.
-# The fourth parameter specifies whether fingerprints need to be normalized.
-# The fifth parameter specifies the level of verbosity for debugging purposes.
+# The second parameter is the fingerprint size to be used.
+# The third parameter specifies whether fingerprints need to be normalized.
+# The fourth parameter specifies the level of verbosity for debugging purposes.
 #
 # The standard output consists of fingerprints of the JSON objects in the file, one per line.
 # The first column is the object identifier.
@@ -33,8 +32,8 @@ use LIBLPH;
 my $LPH = new LIBLPH;
 
 use JSON;
-my($scanfile, $idField, $L, $normalize, $debug) = @ARGV;
-die "Usage: $0 file_to_scan id_field L [normalize] [debug]\n" unless $scanfile && -e $scanfile;
+my($scanfile, $L, $normalize, $debug) = @ARGV;
+die "Usage: $0 file_to_scan L [normalize] [debug]\n" unless $scanfile && -e $scanfile;
 $L ||= 50;
 $LPH->{'L'} = $L;
 $LPH->{'debug'} = $debug if $debug;
@@ -55,10 +54,9 @@ my $jsonString = join("", @jsonContent);
 die "No content in file $scanfile\n" unless $jsonString;
 my $content = decode_json($jsonString);
 
-foreach my $entry (@$content) {
-	my $id = $entry->{$idField};
-	next unless defined $id;
-	delete $entry->{$idField};
+foreach my $id (sort keys %$content) {
+	my $entry = $content->{$id};
+	next unless $id && defined $entry;
 	$LPH->resetFingerprint();
 	$LPH->recurseStructure($entry);
 	next unless $LPH->{'statements'};
