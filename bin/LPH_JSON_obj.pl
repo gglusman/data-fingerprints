@@ -56,7 +56,7 @@ my $content = decode_json($jsonString);
 
 foreach my $id (sort keys %$content) {
 	my $entry = $content->{$id};
-	next unless $id && defined $entry;
+	next unless ($id || length($id)) && defined $entry;
 	$LPH->resetFingerprint();
 	$LPH->recurseStructure($entry);
 	next unless $LPH->{'statements'};
