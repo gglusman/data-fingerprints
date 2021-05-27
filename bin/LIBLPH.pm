@@ -361,7 +361,7 @@ sub normalize {
 	@{$norm->{$_}} = split /,/, $null->{$_} foreach @$Ls;
 	foreach my $L (@$Ls) {
 		my($avg, $std) = $self->avgstd($fp->{$L});
-		foreach (0..$L-1) { $norm->{$L}[$_] = ($fp->{$L}[$_]-$avg)/$std }
+		foreach (0..$L-1) { $norm->{$L}[$_] = ($fp->{$L}[$_]-$avg)/($std || 1) }
 	}
 	
 	#print join("\t", "#normal:", map({sprintf("%.3f", $_)} @{$norm->{$Ls->[0]}}), "sum:", $self->sum($norm->{$Ls->[0]})), "\n" if $self->{'debug'}>2;
