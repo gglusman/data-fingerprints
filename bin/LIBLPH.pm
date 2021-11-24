@@ -247,12 +247,12 @@ sub vector_value { #computes the value of the first argument in vector form
 			my $man_w = 1-$exp_w;
 			foreach my $L (@$Ls) {
 				#encode the mantissa - a fraction, range (-1..1)
-				$mantissa *= $L;
-				if (my $over = abs($mantissa - int($mantissa))) {
-					$new->{$L}[$mantissa % $L] += $man_w*(1-$over);
-					$new->{$L}[($mantissa+($mantissa>0 ? 1 : -1)) % $L] += $man_w*$over;
+				my $Lmantissa = $mantissa * $L;
+				if (my $over = abs($Lmantissa - int($Lmantissa))) {
+					$new->{$L}[$Lmantissa % $L] += $man_w*(1-$over);
+					$new->{$L}[($Lmantissa+($Lmantissa>0 ? 1 : -1)) % $L] += $man_w*$over;
 				} else {
-					$new->{$L}[$mantissa % $L] += $man_w;
+					$new->{$L}[$Lmantissa % $L] += $man_w;
 				}
 				#encode the exponent - an integer, which can be negative
 				$new->{$L}[$exponent % $L] += $exp_w;
@@ -264,12 +264,12 @@ sub vector_value { #computes the value of the first argument in vector form
 			
 			foreach my $L (@$Ls) {
 				#encode the mantissa - a fraction, range (-1..1)
-				$mantissa *= $L;
-				if (my $over = abs($mantissa - int($mantissa))) {
-					$new->{$L}[$mantissa % $L] += 1-$over;
-					$new->{$L}[($mantissa+($mantissa>0 ? 1 : -1)) % $L] += $over;
+				my $Lmantissa = $mantissa * $L;
+				if (my $over = abs($Lmantissa - int($Lmantissa))) {
+					$new->{$L}[$Lmantissa % $L] += 1-$over;
+					$new->{$L}[($Lmantissa+($Lmantissa>0 ? 1 : -1)) % $L] += $over;
 				} else {
-					$new->{$L}[$mantissa % $L]++;
+					$new->{$L}[$Lmantissa % $L]++;
 				}
 			}
 			#encode the log absolute value - which can be negative
